@@ -42,8 +42,8 @@ export default function Auth({ mode }) {
         className="w-full max-w-md"
       >
         <button onClick={() => navigate("/")} className="flex items-center gap-3 mb-8 mx-auto">
-          <div className="w-12 h-12 rounded-full overflow-hidden ring-1 ring-indigo-500/40">
-            <img src={OWL} alt="owl" className="w-full h-full object-cover" />
+          <div className="w-14 h-14 grid place-items-center">
+            <img src={OWL} alt="owl" className="w-full h-full object-contain drop-shadow" />
           </div>
         </button>
         <div className="wc-card p-7">

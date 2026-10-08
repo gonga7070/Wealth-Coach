@@ -10,8 +10,8 @@ export default function Welcome() {
     <div className="wc-app-bg min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-5 sm:px-10 py-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden ring-1 ring-indigo-500/40">
-            <img src={OWL} alt="owl" className="w-full h-full object-cover" />
+          <div className="w-10 h-10 grid place-items-center">
+            <img src={OWL} alt="owl" className="w-full h-full object-contain" />
           </div>
           <span className="font-head font-extrabold text-lg">Wealth Coach</span>
         </div>
@@ -30,10 +30,9 @@ export default function Welcome() {
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 120, damping: 12 }}
-          className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden mb-8 ring-2 ring-amber-400/30 wc-float"
-          style={{ boxShadow: "0 0 60px rgba(99,102,241,0.3)" }}
+          className="w-36 h-36 sm:w-44 sm:h-44 grid place-items-center mb-8 wc-float"
         >
-          <img src={OWL} alt="Hoot the owl" className="w-full h-full object-cover" />
+          <img src={OWL} alt="Hoot the owl" className="w-full h-full object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
         </motion.div>
 
         <motion.h1

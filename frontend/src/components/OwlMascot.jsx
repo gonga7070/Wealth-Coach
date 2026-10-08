@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 export function OwlAvatar({ size = 48, className = "", float = false }) {
   return (
     <div
-      className={`relative shrink-0 rounded-full overflow-hidden bg-[#16171C] ${float ? "wc-float" : ""} ${className}`}
-      style={{ width: size, height: size, border: "1px solid rgba(255,255,255,0.1)" }}
+      className={`relative shrink-0 grid place-items-center ${float ? "wc-float" : ""} ${className}`}
+      style={{ width: size, height: size }}
       data-testid="owl-avatar"
     >
-      <img src={OWL} alt="Hoot the owl" className="w-full h-full object-cover" />
+      <img src={OWL} alt="Hoot the owl" className="w-full h-full object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]" />
     </div>
   );
 }
