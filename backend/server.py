@@ -443,25 +443,89 @@ async def update_category(txn_id: str, req: CategoryUpdate, user: dict = Depends
 
 
 # ---------------- Spending ----------------
+def _range_start(range_key: str):
+    """Return ISO start datetime string for a range, or None for 'all'."""
+    now = datetime.now(timezone.utc)
+    ms = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if range_key == "this_month":
+        return ms.isoformat(), None, "This month"
+    if range_key == "last_month":
+        start = (ms - timedelta(days=1)).replace(day=1)
+        return start.isoformat(), ms.isoformat(), "Last month"
+    if range_key == "3m":
+        start = ms
+        for _ in range(2):
+            start = (start - timedelta(days=1)).replace(day=1)
+        return start.isoformat(), None, "Last 3 months"
+    if range_key == "6m":
+        start = ms
+        for _ in range(5):
+            start = (start - timedelta(days=1)).replace(day=1)
+        return start.isoformat(), None, "Last 6 months"
+    return None, None, "All time"
+
+
+def _spending_trend(txns, n=6):
+    """Spending total per month for the last n months, oldest first."""
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    buckets = []
+    cursor = month_start
+    starts = []
+    for _ in range(n):
+        starts.append(cursor)
+        cursor = (cursor - timedelta(days=1)).replace(day=1)
+    starts = list(reversed(starts))
+    for i, s in enumerate(starts):
+        e = starts[i + 1] if i + 1 < len(starts) else None
+        s_iso = s.isoformat()
+        total = 0.0
+        for t in txns:
+            if t["amount"] < 0 and t["category"] != "Income" and t["date"] >= s_iso and (e is None or t["date"] < e.isoformat()):
+                total += -t["amount"]
+        buckets.append({"month": s.strftime("%b"), "amount": round(total, 2)})
+    return buckets
+
+
 @api.get("/spending")
-async def spending(user: dict = Depends(get_current_user)):
-    ov = await compute_overview(user["id"])
+async def spending(user: dict = Depends(get_current_user), range: str = "this_month"):
+    txns = await db.transactions.find({"user_id": user["id"]}).to_list(5000)
+    start, end, label = _range_start(range)
+    sel = [t for t in txns if (start is None or t["date"] >= start) and (end is None or t["date"] < end)]
+
     budget = await db.budget.find({"user_id": user["id"]}).to_list(100)
     bmap = {b["category"]: b["limit"] for b in budget}
     cat_info = seed_mod.CATEGORIES
+
+    cats = {}
+    for t in sel:
+        if t["amount"] < 0 and t["category"] != "Income":
+            cats[t["category"]] = cats.get(t["category"], 0) + (-t["amount"])
+    ordered = sorted(cats.items(), key=lambda x: -x[1])
+
+    # how many months the range spans, for a fair "usual" comparison
+    months_span = {"this_month": 1, "last_month": 1, "3m": 3, "6m": 6, "all": max(1, len(_spending_trend(txns, 6)))}.get(range, 1)
+
     out = []
-    for c in ov["categories"]:
-        cat = c["category"]
-        usual = bmap.get(cat, round(c["amount"]))
+    total = 0.0
+    for cat, amt in ordered:
+        total += amt
+        usual = bmap.get(cat, round(amt / months_span)) * months_span
         out.append({
             "category": cat,
-            "amount": c["amount"],
-            "usual": usual,
-            "difference": round(c["amount"] - usual, 2),
+            "amount": round(amt, 2),
+            "usual": round(usual, 2),
+            "difference": round(amt - usual, 2),
             "color": cat_info.get(cat, {}).get("color", "#94A3B8"),
             "icon": cat_info.get(cat, {}).get("icon", "Circle"),
         })
-    return {"categories": out, "total": ov["monthly_spending"]}
+    return {
+        "categories": out,
+        "total": round(total, 2),
+        "range": range,
+        "range_label": label,
+        "trend": _spending_trend(txns, 6),
+    }
 
 
 # ---------------- Insights ----------------
