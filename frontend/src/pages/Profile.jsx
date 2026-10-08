@@ -48,7 +48,7 @@ export default function Profile() {
       <h1 className="font-head text-2xl sm:text-3xl font-extrabold">Profile</h1>
 
       <div className="wc-card p-6 flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 grid place-items-center text-2xl font-extrabold">
+        <div className="w-16 h-16 rounded-full bg-amber-500 text-slate-950 grid place-items-center text-2xl font-extrabold">
           {user?.name?.[0]?.toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">

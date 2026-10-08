@@ -34,8 +34,7 @@ export default function Home() {
 
       {/* Net worth + health score */}
       <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="wc-card p-6 md:col-span-2 relative overflow-hidden" data-testid="networth-card">
-          <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full" style={{ background: "radial-gradient(circle, rgba(245,158,11,0.15), transparent 70%)" }} />
+        <div className="wc-card p-6 md:col-span-2" data-testid="networth-card">
           <p className="text-xs uppercase tracking-wide text-slate-400">Net worth</p>
           <div className="font-num text-4xl sm:text-5xl font-extrabold mt-2">{fmt(o.net_worth)}</div>
           <div className={`inline-flex items-center gap-1 mt-3 text-sm font-medium ${up ? "text-emerald-400" : "text-rose-400"}`}>

@@ -3,15 +3,15 @@ import random
 from datetime import datetime, timezone, timedelta
 
 CATEGORIES = {
-    "Housing": {"color": "#6366F1", "icon": "Home"},
-    "Food": {"color": "#10B981", "icon": "ShoppingCart"},
-    "Restaurants": {"color": "#F59E0B", "icon": "UtensilsCrossed"},
-    "Shopping": {"color": "#EC4899", "icon": "ShoppingBag"},
-    "Transportation": {"color": "#06B6D4", "icon": "Car"},
-    "Entertainment": {"color": "#A855F7", "icon": "Clapperboard"},
-    "Bills": {"color": "#F43F5E", "icon": "ReceiptText"},
-    "Health": {"color": "#22C55E", "icon": "HeartPulse"},
-    "Income": {"color": "#14B8A6", "icon": "Banknote"},
+    "Housing": {"color": "#E0A458", "icon": "Home"},
+    "Food": {"color": "#7FA68A", "icon": "ShoppingCart"},
+    "Restaurants": {"color": "#D98E5A", "icon": "UtensilsCrossed"},
+    "Shopping": {"color": "#B5879E", "icon": "ShoppingBag"},
+    "Transportation": {"color": "#6E8CA0", "icon": "Car"},
+    "Entertainment": {"color": "#9A8BB0", "icon": "Clapperboard"},
+    "Bills": {"color": "#C96F6F", "icon": "ReceiptText"},
+    "Health": {"color": "#6FA38B", "icon": "HeartPulse"},
+    "Income": {"color": "#8AA77F", "icon": "Banknote"},
 }
 
 MERCHANTS = {

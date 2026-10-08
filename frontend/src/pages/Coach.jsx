@@ -83,9 +83,9 @@ export default function Coach() {
         {loading && (
           <div className="flex items-center gap-3">
             <OwlAvatar size={36} />
-            <div className="rounded-2xl rounded-tl-sm bg-indigo-950/50 border border-indigo-500/25 px-4 py-3 flex gap-1.5">
+            <div className="wc-card px-4 py-3 flex gap-1.5">
               {[0, 1, 2].map((d) => (
-                <span key={d} className="w-2 h-2 rounded-full bg-indigo-300 animate-bounce" style={{ animationDelay: `${d * 0.15}s` }} />
+                <span key={d} className="w-2 h-2 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: `${d * 0.15}s` }} />
               ))}
             </div>
           </div>
@@ -126,10 +126,10 @@ function Bubble({ m }) {
     >
       {!isUser && <OwlAvatar size={36} />}
       <div
-        className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+        className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap rounded-2xl ${
           isUser
-            ? "bg-amber-500 text-slate-950 rounded-2xl rounded-tr-sm font-medium"
-            : "bg-indigo-950/50 border border-indigo-500/25 text-indigo-50 rounded-2xl rounded-tl-sm"
+            ? "bg-amber-500 text-slate-950 rounded-tr-sm font-medium"
+            : "bg-[#16171C] border border-white/8 text-slate-200 rounded-tl-sm"
         }`}
         data-testid={isUser ? "coach-user-msg" : "coach-ai-msg"}
       >

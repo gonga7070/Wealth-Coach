@@ -44,9 +44,8 @@ export default function Premium() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="wc-card p-8 text-center relative overflow-hidden"
+        className="wc-card p-8 text-center"
       >
-        <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full" style={{ background: "radial-gradient(circle, rgba(245,158,11,0.18), transparent 70%)" }} />
         <OwlAvatar size={72} float className="mx-auto mb-5" />
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 bg-amber-500/15 px-3 py-1.5 rounded-full mb-4">
           <Crown size={14} /> Wealth Coach Plus

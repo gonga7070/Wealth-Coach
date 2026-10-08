@@ -45,7 +45,7 @@ export default function Investing() {
             <AccordionItem key={l.id} value={l.id} className="border-white/8" data-testid={`lesson-${l.id}`}>
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/12 text-indigo-300 grid place-items-center shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-white/5 text-amber-400 grid place-items-center shrink-0 border border-white/8">
                     <Icon name={l.icon} size={20} />
                   </div>
                   <div>
@@ -55,7 +55,7 @@ export default function Investing() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="text-slate-300 text-sm leading-relaxed pl-13 pr-2">
-                <span className="inline-block text-[10px] uppercase tracking-wide text-indigo-400 mb-2">{l.level}</span>
+                <span className="inline-block text-[10px] uppercase tracking-wide text-slate-500 mb-2">{l.level}</span>
                 <p>{l.body}</p>
               </AccordionContent>
             </AccordionItem>

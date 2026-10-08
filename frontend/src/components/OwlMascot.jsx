@@ -1,15 +1,11 @@
 import { OWL } from "@/lib/assets";
 import { motion } from "framer-motion";
 
-export function OwlAvatar({ size = 48, className = "", float = false, glow = true }) {
+export function OwlAvatar({ size = 48, className = "", float = false }) {
   return (
     <div
-      className={`relative shrink-0 rounded-full overflow-hidden ${float ? "wc-float" : ""} ${className}`}
-      style={{
-        width: size,
-        height: size,
-        boxShadow: glow ? "0 0 0 1px rgba(245,158,11,0.35), 0 8px 24px rgba(245,158,11,0.22)" : "none",
-      }}
+      className={`relative shrink-0 rounded-full overflow-hidden bg-[#16171C] ${float ? "wc-float" : ""} ${className}`}
+      style={{ width: size, height: size, border: "1px solid rgba(255,255,255,0.1)" }}
       data-testid="owl-avatar"
     >
       <img src={OWL} alt="Athena the owl" className="w-full h-full object-cover" />
@@ -20,17 +16,17 @@ export function OwlAvatar({ size = 48, className = "", float = false, glow = tru
 export function OwlBubble({ children, name = "Athena", className = "" }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-start gap-3 ${className}`}
       data-testid="owl-bubble"
     >
-      <OwlAvatar size={44} float />
-      <div className="flex-1 rounded-2xl rounded-tl-sm bg-indigo-950/50 border border-indigo-500/25 p-4">
-        <div className="text-[11px] uppercase tracking-wide text-indigo-300 font-semibold mb-1">
+      <OwlAvatar size={42} />
+      <div className="flex-1 wc-card p-4">
+        <div className="text-[11px] uppercase tracking-wider text-amber-500/90 font-semibold mb-1">
           {name} · your coach
         </div>
-        <div className="text-sm text-indigo-100 leading-relaxed">{children}</div>
+        <div className="text-sm text-slate-200 leading-relaxed">{children}</div>
       </div>
     </motion.div>
   );

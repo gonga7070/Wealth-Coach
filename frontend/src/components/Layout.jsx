@@ -81,9 +81,9 @@ export default function Layout() {
         <button
           onClick={() => navigate("/app/premium")}
           data-testid="sidebar-plus-btn"
-          className="mt-3 flex items-center gap-2 justify-center rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-semibold text-sm py-2.5 hover:opacity-90 transition"
+          className="mt-3 flex items-center gap-2 justify-center rounded-lg border border-amber-500/30 bg-amber-500/8 text-amber-400 font-medium text-sm py-2.5 hover:bg-amber-500/14 transition"
         >
-          <Crown size={16} /> Wealth Coach Plus
+          <Crown size={15} /> Wealth Coach Plus
         </button>
         <button
           onClick={() => { logout(); navigate("/"); }}
@@ -102,7 +102,7 @@ export default function Layout() {
             <span className="font-head font-bold">Wealth Coach</span>
           </div>
           <div className="hidden lg:block text-sm text-slate-400">
-            Welcome back, <span className="text-white font-semibold">{user?.name?.split(" ")[0]}</span> 👋
+            Welcome back, <span className="text-white font-semibold">{user?.name?.split(" ")[0]}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -117,7 +117,7 @@ export default function Layout() {
             </button>
             <button
               onClick={() => navigate("/app/profile")}
-              className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-bold grid place-items-center text-sm"
+              className="w-9 h-9 rounded-full bg-amber-500 text-slate-950 font-bold grid place-items-center text-sm"
               data-testid="topbar-avatar-btn"
             >
               {user?.name?.[0]?.toUpperCase() || "W"}

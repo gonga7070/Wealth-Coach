@@ -160,8 +160,8 @@ function CreateGoalModal({ open, onClose, onCreated }) {
         </div>
 
         {monthly > 0 && (
-          <div className="mt-4 rounded-xl bg-indigo-950/50 border border-indigo-500/25 p-4 text-sm text-indigo-100" data-testid="goal-calc">
-            You'll need about <span className="font-num font-bold text-amber-300">{fmt(Math.round(monthly))}/month</span> to reach this goal on time.
+          <div className="mt-4 wc-card p-4 text-sm text-slate-300" data-testid="goal-calc">
+            You'll need about <span className="font-num font-bold text-amber-400">{fmt(Math.round(monthly))}/month</span> to reach this goal on time.
           </div>
         )}
 
