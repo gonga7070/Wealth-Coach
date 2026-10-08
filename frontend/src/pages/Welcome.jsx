@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { OWL } from "@/lib/assets";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
@@ -9,12 +8,7 @@ export default function Welcome() {
   return (
     <div className="wc-app-bg min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-5 sm:px-10 py-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 grid place-items-center">
-            <img src={OWL} alt="owl" className="w-full h-full object-contain" />
-          </div>
-          <span className="font-head font-extrabold text-lg">Wealth Coach</span>
-        </div>
+        <span className="font-head font-extrabold text-lg">Wealth Coach</span>
         <Button
           variant="ghost"
           onClick={() => navigate("/login")}
@@ -27,12 +21,11 @@ export default function Welcome() {
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-10">
         <motion.div
-          initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 120, damping: 12 }}
-          className="w-36 h-36 sm:w-44 sm:h-44 grid place-items-center mb-8 wc-float"
+          initial={{ y: 12, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-300 text-sm font-medium"
         >
-          <img src={OWL} alt="Hoot the owl" className="w-full h-full object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
+          <Sparkles size={15} /> Personal finance, simplified
         </motion.div>
 
         <motion.h1

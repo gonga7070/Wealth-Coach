@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { OWL } from "@/lib/assets";
 import { useAuth } from "@/context/AuthContext";
 import { apiErr } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -41,10 +40,8 @@ export default function Auth({ mode }) {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <button onClick={() => navigate("/")} className="flex items-center gap-3 mb-8 mx-auto">
-          <div className="w-14 h-14 grid place-items-center">
-            <img src={OWL} alt="owl" className="w-full h-full object-contain drop-shadow" />
-          </div>
+        <button onClick={() => navigate("/")} className="block mb-8 mx-auto text-center">
+          <span className="font-head font-extrabold text-xl">Wealth Coach</span>
         </button>
         <div className="wc-card p-7">
           <h1 className="font-head text-2xl font-extrabold text-center">
