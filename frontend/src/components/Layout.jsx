@@ -67,7 +67,6 @@ export default function Layout() {
           className="flex items-center gap-3 px-2 mb-6"
           data-testid="brand-home-btn"
         >
-          <OwlAvatar size={40} />
           <div className="text-left">
             <div className="font-head font-extrabold text-lg leading-none">Wealth Coach</div>
             <div className="text-[11px] text-slate-500">Your money, explained.</div>
@@ -98,7 +97,6 @@ export default function Layout() {
         {/* Top bar */}
         <header className="sticky top-0 z-40 wc-glass border-b border-white/8 px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 lg:hidden">
-            <OwlAvatar size={34} />
             <span className="font-head font-bold">Wealth Coach</span>
           </div>
           <div className="hidden lg:block text-sm text-slate-400">
