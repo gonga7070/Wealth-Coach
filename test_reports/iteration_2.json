@@ -1,0 +1,23 @@
+{
+  "summary": "Focused frontend regression test on the Ask Coach light/dark theme bug fix. Logged-in session (alex@demo.com was already authenticated). Verified: (1) Profile > theme-light-btn sets html.light + localStorage wc_theme='light'. (2) On /app/coach in LIGHT mode, body bg = rgb(238,240,244), the assistant .wc-bubble (data-testid coach-ai-msg) renders bg=rgb(255,255,255) with dark text rgb(39,42,51) — readable light bubble, no dark bubble. (3) .wc-chat-fade uses linear-gradient(to top, rgb(238,240,244) 35%, transparent) — NO dark gradient strip at bottom. (4) Suggestion chips and input placeholder visible; sent 'Can I afford a $700 vacation?' and got a personalized AI reply referencing $4,821/$4,121/$2,883. User bubble renders as amber with dark text (visible in screenshot). (5) Switched back to DARK: html class cleared, body bg rgb(10,11,13), wc-bubble bg rgb(22,23,28) with light text rgb(231,233,238) — no regression. (6) Persistence: after switching to light and reloading /app/coach, html='light' and localStorage='light' retained, wc-bubble still white. All four requested verifications PASS.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "ThemeContext toggles by adding/removing a 'light' class on <html>; works fine, but consider also setting a data-theme attribute to make CSS selection more semantic and avoid class-string collisions.",
+    "The .wc-chat-fade light-mode gradient color is hardcoded to rgb(238,240,244); if the page background token ever changes, this will visibly mismatch. Prefer binding to a CSS var (e.g. var(--wc-bg))."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested (frontend-only request)", "frontend": "100% of theme/coach bug-fix scenarios (4/4)"},
+  "test_credentials": "alex@demo.com / password123 (session was already active in preview browser context; no explicit login needed during this test).",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Coach light-mode fix verified via computed-style assertions on .wc-bubble (bg rgb(255,255,255)) and .wc-chat-fade (linear-gradient with light bg color). ThemeContext persists to localStorage key wc_theme and sets html.light. Review request mentioned 'no login / guest session', but the deployed app DOES require auth and uses alex@demo.com from iteration_1 as the seeded user — flag this doc mismatch to main agent if relevant.",
+  "rca of the issue": "Previous bug: Coach.jsx hardcoded bg-[#16171C] on assistant bubbles and from-[#090A0F] gradient on input wrapper — both baked dark colors regardless of theme. Fix: moved to .wc-bubble and .wc-chat-fade classes in index.css with html.light overrides. Verified computed styles switch correctly between themes and persist across reload."
+}
