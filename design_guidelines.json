@@ -1,0 +1,102 @@
+{
+  "app_name": "Wealth Coach",
+  "theme": {
+    "mode": "dark",
+    "archetype": "Luxury Dark + Old Money Tech (Obsidian Gold & AI Indigo)",
+    "description": "A dark, ultra-premium, approachable financial coaching app. Eliminates banking complexity by explaining money clearly, celebrating milestones with an AI Owl mascot, and guiding users with actionable steps."
+  },
+  "typography": {
+    "font_family_heading": "Cabinet Grotesk / Outfit / Plus Jakarta Sans, sans-serif",
+    "font_family_body": "Inter / Plus Jakarta Sans, sans-serif",
+    "font_family_numeric": "JetBrains Mono / Tabular numbers, monospace",
+    "hierarchy": {
+      "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-semibold",
+      "h4": "text-lg font-semibold",
+      "body_lg": "text-base sm:text-lg leading-relaxed text-slate-300",
+      "body_md": "text-sm sm:text-base leading-normal text-slate-400",
+      "caption": "text-xs font-medium tracking-wide text-slate-500 uppercase",
+      "financial_stat": "font-mono font-extrabold tracking-tight text-emerald-400"
+    }
+  },
+  "colors": {
+    "background_base": "#090A0F",
+    "surface_level_1": "#11131E",
+    "surface_level_2": "#1A1D2E",
+    "surface_level_3": "#25293E",
+    "border_subtle": "rgba(255, 255, 255, 0.08)",
+    "border_active": "rgba(245, 158, 11, 0.4)",
+    "primary_accent": "#F59E0B",
+    "primary_accent_hover": "#D97706",
+    "ai_owl_accent": "#6366F1",
+    "positive_emerald": "#10B981",
+    "negative_rose": "#F43F5E",
+    "warning_amber": "#F59E0B",
+    "text_primary": "#F8FAFC",
+    "text_secondary": "#94A3B8",
+    "text_muted": "#64748B",
+    "gradient_hero": "from-amber-500/10 via-indigo-500/5 to-transparent",
+    "gradient_gold_glow": "radial-gradient(circle, rgba(245,158,11,0.15) 0%, rgba(9,10,15,0) 70%)"
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-slate-900/70 border border-white/10 shadow-2xl shadow-black/50",
+    "card_hover_effect": "transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-[0_10px_30px_rgba(245,158,11,0.1)]",
+    "owl_mascot": {
+      "name": "Athena the Wise Owl",
+      "badge": "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5",
+      "quote_box": "bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4 text-indigo-200 shadow-lg relative overflow-hidden"
+    },
+    "score_gauge": "Simple 1-100 Wealth Health Score with status indicator (e.g. 78/100 'Thriving')",
+    "card_style": "rounded-2xl border border-white/10 bg-slate-900/60 p-5 md:p-6 backdrop-blur-md"
+  },
+  "layout_and_navigation": {
+    "responsive_strategy": "Mobile bottom navigation bar with key quick actions + Desktop full left sidebar (collapsible/fixed)",
+    "header": "Fixed top bar with quick Financial Health Badge (Score 78), Owl Mascot Quick Coach toggle, Notifications trigger, and Profile avatar with backdrop-blur-md bg-slate-950/80 z-40 border-b border-white/10",
+    "grid_bento": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6",
+    "pages_navigation": [
+      { "id": "welcome", "label": "Welcome", "icon": "Sparkles" },
+      { "id": "onboarding", "label": "Onboarding", "icon": "UserCheck" },
+      { "id": "home", "label": "Dashboard", "icon": "LayoutDashboard" },
+      { "id": "money", "label": "Accounts", "icon": "Wallet" },
+      { "id": "account-details", "label": "Account Details", "icon": "CreditCard" },
+      { "id": "transaction-details", "label": "Transaction", "icon": "Receipt" },
+      { "id": "spending", "label": "Spending", "icon": "PieChart" },
+      { "id": "insights", "label": "AI Insights", "icon": "Brain" },
+      { "id": "insight-details", "label": "Insight Detail", "icon": "Lightbulb" },
+      { "id": "goals", "label": "Financial Goals", "icon": "Target" },
+      { "id": "create-goal", "label": "Create Goal", "icon": "PlusCircle" },
+      { "id": "goal-details", "label": "Goal Progress", "icon": "Trophy" },
+      { "id": "budget", "label": "Spending Plan", "icon": "Sliders" },
+      { "id": "recurring", "label": "Subscriptions", "icon": "CalendarRepeat" },
+      { "id": "savings", "label": "Savings Vaults", "icon": "PiggyBank" },
+      { "id": "investing", "label": "Investing Academy", "icon": "TrendingUp" },
+      { "id": "coach-chat", "label": "Ask AI Coach", "icon": "MessageSquare" },
+      { "id": "notifications", "label": "Alerts & Tips", "icon": "Bell" },
+      { "id": "profile", "label": "Profile", "icon": "User" },
+      { "id": "premium", "label": "Wealth Coach Plus", "icon": "Crown" },
+      { "id": "celebration", "label": "Milestones", "icon": "PartyPopper" }
+    ]
+  },
+  "image_urls": {
+    "owl_mascot_portrait": "https://images.unsplash.com/photo-1543876140-dc6979975b25?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "owl_mascot_close_up": "https://images.unsplash.com/photo-1567443756539-26a8fdd248cf?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "wealth_gold_coins": "https://images.unsplash.com/photo-1755369394394-685cd2ea3140?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "user_avatar_main": "https://images.unsplash.com/photo-1764545973653-94c40d993495?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "user_avatar_2": "https://images.unsplash.com/photo-1765776830139-72b2184dae5a?crop=entropy&cs=srgb&fm=jpg&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Build a unified single-page responsive React application with a slick, intuitive navigation bar / sidebar allowing seamless switching across all 22 required pages/views.",
+    "Implement the dark luxury coach aesthetic with smooth framer-motion tab transitions and custom micro-interactions.",
+    "Ensure the Owl Mascot (Athena) appears as a floating assistant widget and sticky coach highlight across views.",
+    "Use mock interactive states (adding goals, asking AI coach questions with simulated smart responses, calculating budget changes, toggling accounts).",
+    "Add data-testid to all interactive components (buttons, tabs, inputs, cards) for end-to-end testing reliability."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Never use generic centered layouts or plain white backgrounds. Always maintain dark obsidian depth.",
+    "Use lucide-react icons exclusively for clean vector rendering.",
+    "Ensure all contrast ratios exceed WCAG AA standards in dark mode.",
+    "Always set explicit text color on hover states (e.g. hover:bg-slate-800 hover:text-white).",
+    "Add data-testid attributes to all primary buttons, inputs, links, and cards."
+  ]
+}
