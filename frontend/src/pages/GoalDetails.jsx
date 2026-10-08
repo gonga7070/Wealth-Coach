@@ -78,7 +78,7 @@ export default function GoalDetails() {
         </div>
         <h1 className="font-head text-2xl font-extrabold">{g.name}</h1>
         <div className="my-5">
-          <RingProgress value={pct} label={`${pct}%`} sub="complete" color={g.color} size={160} stroke={12} />
+          <RingProgress value={pct} label={`${pct}%`} sub="complete" from={g.color} to="#8CFFDD" color={g.color} size={160} stroke={12} />
         </div>
         <div className="font-num text-xl font-bold">{fmt(g.current)} <span className="text-slate-500">/ {fmt(g.target)}</span></div>
         {monthsLeft != null && pct < 100 && (

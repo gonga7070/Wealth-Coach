@@ -54,7 +54,7 @@ export default function Home() {
           className="wc-card wc-card-hover p-6 flex flex-col items-center justify-center text-center"
         >
           <p className="text-xs uppercase tracking-wide text-slate-400 mb-3">Financial health</p>
-          <RingProgress value={o.health_score} label={o.health_score} sub="of 100" color="#10B981" size={130} />
+          <RingProgress value={o.health_score} label={o.health_score} sub="of 100" from="#8CFFDD" to="#34D399" size={130} />
           <div className="mt-3 text-emerald-400 font-semibold">{health_label}</div>
         </button>
       </motion.div>
@@ -100,7 +100,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <Bar className="mt-4" value={(primary_goal.current / primary_goal.target) * 100} color={primary_goal.color} />
+            <Bar className="mt-4" value={(primary_goal.current / primary_goal.target) * 100} color={primary_goal.color} glow />
           </button>
         )}
 

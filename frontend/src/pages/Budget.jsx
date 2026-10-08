@@ -47,7 +47,7 @@ export default function Budget() {
             <div className="font-num text-xl font-bold text-slate-300 mt-1">{fmt(data.total_limit)}</div>
           </div>
         </div>
-        <Bar className="mt-4" value={(data.total_spent / data.total_limit) * 100} color={data.total_spent > data.total_limit ? "#F43F5E" : "#10B981"} />
+        <Bar className="mt-4" value={(data.total_spent / data.total_limit) * 100} color={data.total_spent > data.total_limit ? "#F43F5E" : "#34D399"} glow />
       </div>
 
       {overCount > 0 && (

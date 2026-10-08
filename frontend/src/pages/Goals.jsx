@@ -57,7 +57,7 @@ export default function Goals() {
 
       {/* Summary */}
       <div className="wc-card p-6 flex flex-col sm:flex-row items-center gap-6" data-testid="goals-summary">
-        <RingProgress value={overallPct} label={`${overallPct}%`} sub="funded" color="#F5A623" size={104} stroke={9} />
+        <RingProgress value={overallPct} label={`${overallPct}%`} sub="funded" from="#FDE68A" to="#F5A623" size={104} stroke={9} />
         <div className="flex-1 grid grid-cols-3 gap-4 w-full">
           <SummaryStat label="Saved across goals" value={fmt(totalCurrent)} accent />
           <SummaryStat label="Total targets" value={fmt(totalTarget)} />
@@ -111,7 +111,7 @@ export default function Goals() {
                   </span>
                 </div>
 
-                <Bar value={pct} color={color} />
+                <Bar value={pct} color={color} glow />
 
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
                   <Meta label="Remaining" value={fmt(remaining)} />

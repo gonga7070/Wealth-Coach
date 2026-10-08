@@ -41,7 +41,7 @@ export default function Savings() {
         </div>
         <div className="wc-card p-6 flex flex-col items-center justify-center">
           <p className="text-xs uppercase tracking-wide text-slate-400 mb-3">Savings rate</p>
-          <RingProgress value={data.savings_rate} label={`${data.savings_rate}%`} sub="of income" color="#F59E0B" size={130} />
+          <RingProgress value={data.savings_rate} label={`${data.savings_rate}%`} sub="of income" from="#FDE68A" to="#F5A623" size={130} />
         </div>
       </div>
 
@@ -57,7 +57,7 @@ export default function Savings() {
             <span className="font-num font-bold text-emerald-400">{efPct}%</span>
           </div>
           <div className="font-num text-sm text-slate-400 mb-3">{fmt(ef.current)} / {fmt(ef.target)}</div>
-          <Bar value={efPct} color="#10B981" />
+          <Bar value={efPct} from="#8CFFDD" to="#34D399" glow />
           <p className="text-xs text-slate-500 mt-3">Your emergency fund is {efPct}% complete.</p>
         </button>
       )}

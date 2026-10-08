@@ -71,11 +71,17 @@ export default function Spending() {
         <div className="h-44">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data?.trend || []} margin={{ top: 6, right: 0, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#B39AFF" />
+                  <stop offset="100%" stopColor="#8CFFDD" />
+                </linearGradient>
+              </defs>
               <XAxis dataKey="month" tick={{ fill: "#6b7280", fontSize: 12 }} axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: "rgba(255,255,255,0.04)" }} content={<TrendTooltip />} />
-              <Bar dataKey="amount" radius={[6, 6, 0, 0]} maxBarSize={48}>
+              <Bar dataKey="amount" radius={[8, 8, 0, 0]} maxBarSize={46}>
                 {(data?.trend || []).map((d, i) => (
-                  <Cell key={i} fill={d.month === curMonth ? "#F5A623" : "#3a3d46"} />
+                  <Cell key={i} fill={d.month === curMonth ? "url(#trendGrad)" : "#2f323b"} />
                 ))}
               </Bar>
             </BarChart>
@@ -88,7 +94,7 @@ export default function Spending() {
         <div className="relative w-44 h-44 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={data?.categories || []} dataKey="amount" innerRadius={58} outerRadius={80} paddingAngle={3} stroke="none">
+              <Pie data={data?.categories || []} dataKey="amount" innerRadius={56} outerRadius={82} paddingAngle={3} cornerRadius={6} stroke="none">
                 {(data?.categories || []).map((c, i) => (
                   <Cell key={i} fill={c.color} />
                 ))}
