@@ -159,34 +159,40 @@ export default function Layout() {
 
       {/* Mobile bottom nav */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 wc-glass border-t border-white/10 px-2 py-2 flex items-center justify-around">
-        {BOTTOM.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              data-testid={`bottomnav-${item.label.toLowerCase()}`}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium ${
-                  isActive ? "text-amber-300" : "text-slate-500"
-                }`
-              }
-            >
-              <Icon size={20} />
-              {item.label}
-            </NavLink>
-          );
-        })}
+        {BOTTOM.slice(0, 2).map((item) => (
+          <BottomLink key={item.to} item={item} />
+        ))}
         <button
           onClick={() => navigate("/app/coach")}
           data-testid="bottomnav-coach"
           className="flex flex-col items-center -mt-6"
         >
           <OwlAvatar size={46} />
-          <span className="text-[10px] text-indigo-300 font-medium mt-0.5">Coach</span>
+          <span className="text-[10px] text-amber-300 font-medium mt-0.5">Coach</span>
         </button>
+        {BOTTOM.slice(2).map((item) => (
+          <BottomLink key={item.to} item={item} />
+        ))}
       </nav>
     </div>
+  );
+}
+
+function BottomLink({ item }) {
+  const Icon = item.icon;
+  return (
+    <NavLink
+      to={item.to}
+      end={item.end}
+      data-testid={`bottomnav-${item.label.toLowerCase()}`}
+      className={({ isActive }) =>
+        `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium ${
+          isActive ? "text-amber-300" : "text-slate-500"
+        }`
+      }
+    >
+      <Icon size={20} />
+      {item.label}
+    </NavLink>
   );
 }
