@@ -8,7 +8,7 @@ export function OwlAvatar({ size = 48, className = "", float = false, glow = tru
       style={{
         width: size,
         height: size,
-        boxShadow: glow ? "0 0 0 1px rgba(99,102,241,0.4), 0 8px 24px rgba(99,102,241,0.25)" : "none",
+        boxShadow: glow ? "0 0 0 1px rgba(245,158,11,0.35), 0 8px 24px rgba(245,158,11,0.22)" : "none",
       }}
       data-testid="owl-avatar"
     >

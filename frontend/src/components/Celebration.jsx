@@ -39,12 +39,12 @@ export default function Celebration({ show, title, message, onClose }) {
             className="relative wc-card max-w-sm w-full text-center p-8"
           >
             <motion.div
-              initial={{ rotate: -8 }}
-              animate={{ rotate: [-8, 8, -8] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="w-28 h-28 mx-auto rounded-full overflow-hidden mb-5 ring-2 ring-amber-400/40"
+              initial={{ rotate: -6, scale: 0.9 }}
+              animate={{ rotate: [-6, 6, -6], y: [0, -6, 0] }}
+              transition={{ repeat: Infinity, duration: 2.4 }}
+              className="w-40 h-44 mx-auto mb-5 flex items-end justify-center"
             >
-              <img src={OWL_CELEBRATE} alt="Celebration owl" className="w-full h-full object-cover" />
+              <img src={OWL_CELEBRATE} alt="Celebration owl" className="h-full w-auto object-contain drop-shadow-[0_10px_30px_rgba(245,158,11,0.3)]" />
             </motion.div>
             <h2 className="text-2xl font-head font-extrabold mb-2 wc-gold-text">{title}</h2>
             <p className="text-slate-300 text-sm mb-6">{message}</p>
