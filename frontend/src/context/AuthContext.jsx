@@ -10,8 +10,15 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem("wc_token");
     if (!token) {
-      setUser(false);
-      setBooting(false);
+      // No sign-in required: drop straight into the app with a guest session.
+      api
+        .post("/auth/guest")
+        .then((r) => {
+          localStorage.setItem("wc_token", r.data.token);
+          setUser(r.data.user);
+        })
+        .catch(() => setUser(false))
+        .finally(() => setBooting(false));
       return;
     }
     api
@@ -19,8 +26,12 @@ export function AuthProvider({ children }) {
       .then((r) => setUser(r.data))
       .catch(() => {
         localStorage.removeItem("wc_token");
-        setUser(false);
+        return api.post("/auth/guest").then((r) => {
+          localStorage.setItem("wc_token", r.data.token);
+          setUser(r.data.user);
+        });
       })
+      .catch(() => setUser(false))
       .finally(() => setBooting(false));
   }, []);
 
@@ -38,9 +49,15 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
-  const logout = () => {
+  const logout = async () => {
     localStorage.removeItem("wc_token");
-    setUser(false);
+    try {
+      const { data } = await api.post("/auth/guest");
+      localStorage.setItem("wc_token", data.token);
+      setUser(data.user);
+    } catch {
+      setUser(false);
+    }
   };
 
   return (

@@ -329,6 +329,21 @@ async def login(req: LoginReq):
                                      "onboarded": user.get("onboarded", False), "plus": user.get("plus", False)}}
 
 
+@api.post("/auth/guest")
+async def guest():
+    import uuid
+    uid_email = f"guest-{uuid.uuid4().hex[:12]}@wealthcoach.local"
+    doc = {"name": "Alex", "email": uid_email, "password_hash": hash_password(uuid.uuid4().hex),
+           "onboarded": True, "plus": False, "guest": True, "primary_goal": "Save more",
+           "created_at": datetime.now(timezone.utc).isoformat()}
+    res = await db.users.insert_one(doc)
+    uid = str(res.inserted_id)
+    await seed_user_data(uid, "Save more")
+    token = create_access_token(uid, uid_email)
+    return {"token": token, "user": {"id": uid, "name": "Alex", "email": uid_email,
+                                     "onboarded": True, "plus": False}}
+
+
 @api.get("/auth/me")
 async def me(user: dict = Depends(get_current_user)):
     return {"id": user["id"], "name": user["name"], "email": user["email"],
