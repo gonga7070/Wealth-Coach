@@ -4,6 +4,7 @@ import api from "@/lib/api";
 import { fmt, relativeMonths } from "@/lib/format";
 import { RingProgress } from "@/components/Charts";
 import { Icon } from "@/lib/icons";
+import { goalImage } from "@/lib/images";
 import Celebration from "@/components/Celebration";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,21 +73,29 @@ export default function GoalDetails() {
         <ArrowLeft size={16} /> Goals
       </button>
 
-      <div className="wc-card p-6 flex flex-col items-center text-center">
-        <div className="w-14 h-14 rounded-2xl grid place-items-center mb-4" style={{ background: `${g.color}22`, color: g.color }}>
-          <Icon name={g.icon} size={28} />
+      <div className="wc-card overflow-hidden p-0">
+        <div className="relative h-40">
+          <img src={goalImage(g)} alt={g.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,11,13,0.15) 0%, rgba(10,11,13,0.5) 55%, rgba(19,20,26,0.96) 100%)" }} />
+          <div className="absolute bottom-4 left-5 flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl grid place-items-center backdrop-blur-md" style={{ background: `${g.color}2e`, color: "#fff", border: `1px solid ${g.color}66` }}>
+              <Icon name={g.icon} size={22} />
+            </div>
+            <h1 className="font-head text-2xl font-extrabold drop-shadow">{g.name}</h1>
+          </div>
         </div>
-        <h1 className="font-head text-2xl font-extrabold">{g.name}</h1>
-        <div className="my-5">
-          <RingProgress value={pct} label={`${pct}%`} sub="complete" from={g.color} to="#8CFFDD" color={g.color} size={160} stroke={12} />
+        <div className="flex flex-col items-center text-center p-6">
+          <div className="mb-5 -mt-2">
+            <RingProgress value={pct} label={`${pct}%`} sub="complete" from={g.color} to="#8CFFDD" color={g.color} size={160} stroke={12} />
+          </div>
+          <div className="font-num text-xl font-bold">{fmt(g.current)} <span className="text-slate-500">/ {fmt(g.target)}</span></div>
+          {monthsLeft != null && pct < 100 && (
+            <p className="text-slate-400 text-sm mt-2">
+              On track to reach your goal in about <span className="text-white font-semibold">{monthsLeft} months</span>.
+            </p>
+          )}
+          {pct >= 100 && <p className="text-emerald-400 text-sm mt-2 font-semibold">You did it! Goal reached 🎉</p>}
         </div>
-        <div className="font-num text-xl font-bold">{fmt(g.current)} <span className="text-slate-500">/ {fmt(g.target)}</span></div>
-        {monthsLeft != null && pct < 100 && (
-          <p className="text-slate-400 text-sm mt-2">
-            On track to reach your goal in about <span className="text-white font-semibold">{monthsLeft} months</span>.
-          </p>
-        )}
-        {pct >= 100 && <p className="text-emerald-400 text-sm mt-2 font-semibold">You did it! Goal reached 🎉</p>}
       </div>
 
       {/* Add money */}

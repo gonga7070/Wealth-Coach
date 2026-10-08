@@ -5,6 +5,7 @@ import api from "@/lib/api";
 import { fmt, relativeMonths } from "@/lib/format";
 import { Bar, RingProgress } from "@/components/Charts";
 import { Icon } from "@/lib/icons";
+import { goalImage } from "@/lib/images";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -88,39 +89,37 @@ export default function Goals() {
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/app/goals/${g.id}`)}
                 data-testid={`goal-card-${g.id}`}
-                className="wc-card wc-card-hover p-6 text-left relative overflow-hidden"
+                className="wc-card wc-card-hover text-left overflow-hidden p-0"
               >
-                <span className="absolute left-0 top-0 h-full w-1" style={{ background: color }} />
-                <div className="flex items-start justify-between mb-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl grid place-items-center" style={{ background: `${color}1f`, color }}>
-                      <Icon name={g.icon} size={24} />
-                    </div>
-                    <div>
-                      <div className="font-head font-bold text-lg leading-tight">{g.name}</div>
-                      <div className="font-num text-sm text-slate-400 mt-0.5">
-                        {fmt(g.current)} <span className="text-slate-600">/ {fmt(g.target)}</span>
-                      </div>
-                    </div>
-                  </div>
+                <div className="relative h-32">
+                  <img src={goalImage(g)} alt={g.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,11,13,0.1) 0%, rgba(10,11,13,0.55) 55%, rgba(19,20,26,0.95) 100%)" }} />
                   <span
-                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                    style={done ? { background: "#6FA38B22", color: "#8FC1A9" } : { background: `${color}1f`, color }}
+                    className="absolute top-3 right-3 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md"
+                    style={done ? { background: "rgba(111,163,139,0.25)", color: "#9FDFC4" } : { background: "rgba(0,0,0,0.35)", color: "#fff" }}
                   >
                     {done ? "Complete" : `${pct}%`}
                   </span>
+                  <div className="absolute bottom-3 left-4 right-4 flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl grid place-items-center backdrop-blur-md shrink-0" style={{ background: `${color}2e`, color: "#fff", border: `1px solid ${color}66` }}>
+                      <Icon name={g.icon} size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-head font-bold text-lg leading-tight drop-shadow truncate">{g.name}</div>
+                      <div className="font-num text-xs text-slate-200/90 drop-shadow">
+                        {fmt(g.current)} <span className="text-slate-300/70">/ {fmt(g.target)}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <Bar value={pct} color={color} glow />
-
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
-                  <Meta label="Remaining" value={fmt(remaining)} />
-                  <Meta label="Per month" value={fmt(g.monthly_contribution)} />
-                  <Meta
-                    label="Timeline"
-                    value={done ? "Reached" : months != null ? `~${months} mo` : "—"}
-                    right
-                  />
+                <div className="p-5">
+                  <Bar value={pct} color={color} glow />
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
+                    <Meta label="Remaining" value={fmt(remaining)} />
+                    <Meta label="Per month" value={fmt(g.monthly_contribution)} />
+                    <Meta label="Timeline" value={done ? "Reached" : months != null ? `~${months} mo` : "—"} right />
+                  </div>
                 </div>
               </motion.button>
             );

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import { fmt } from "@/lib/format";
-import { Icon } from "@/lib/icons";
+import { LESSON_IMAGES, INVEST_HERO } from "@/lib/images";
 import { OwlBubble } from "@/components/OwlMascot";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { GraduationCap } from "lucide-react";
@@ -25,10 +25,16 @@ export default function Investing() {
       </div>
 
       {data.holdings.map((h) => (
-        <button key={h.id} onClick={() => navigate(`/app/money/${h.id}`)} data-testid="investing-holding" className="w-full wc-card wc-card-hover p-6 text-left">
-          <p className="text-xs uppercase tracking-wide text-slate-400">Your investments · {h.institution}</p>
-          <div className="font-num text-3xl font-extrabold mt-1">{fmt(h.balance)}</div>
-          <p className="text-sm text-slate-500 mt-1">{h.name} — tap to view activity</p>
+        <button key={h.id} onClick={() => navigate(`/app/money/${h.id}`)} data-testid="investing-holding" className="w-full wc-card wc-card-hover text-left overflow-hidden p-0">
+          <div className="relative h-36">
+            <img src={INVEST_HERO} alt="Investments" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,11,13,0.25) 0%, rgba(10,11,13,0.55) 50%, rgba(19,20,26,0.96) 100%)" }} />
+            <div className="absolute bottom-4 left-5">
+              <p className="text-xs uppercase tracking-wide text-slate-300 drop-shadow">Your investments · {h.institution}</p>
+              <div className="font-num text-3xl font-extrabold mt-1 drop-shadow">{fmt(h.balance)}</div>
+              <p className="text-sm text-slate-300/80 mt-0.5 drop-shadow">{h.name} — tap to view activity</p>
+            </div>
+          </div>
         </button>
       ))}
 
@@ -45,8 +51,8 @@ export default function Investing() {
             <AccordionItem key={l.id} value={l.id} className="border-white/8" data-testid={`lesson-${l.id}`}>
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 rounded-lg bg-white/5 text-amber-400 grid place-items-center shrink-0 border border-white/8">
-                    <Icon name={l.icon} size={20} />
+                  <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/10">
+                    <img src={LESSON_IMAGES[l.id]} alt={l.title} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="font-semibold">{l.title}</div>
