@@ -229,18 +229,18 @@ export default function Onboarding() {
             </motion.div>
           </AnimatePresence>
 
-          {step < TOTAL - 1 && (
-            <div className="flex gap-3 mt-8">
-              {step > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={() => setStep(step - 1)}
-                  className="rounded-full border-white/15 bg-white/5"
-                  data-testid="onboarding-back-btn"
-                >
-                  Back
-                </Button>
-              )}
+          <div className="flex gap-3 mt-8">
+            {step > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => setStep(step - 1)}
+                className="rounded-full border-white/15 bg-white/5"
+                data-testid="onboarding-back-btn"
+              >
+                Back
+              </Button>
+            )}
+            {step < TOTAL - 1 && (
               <Button
                 onClick={() => setStep(step + 1)}
                 disabled={!canNext}
@@ -249,8 +249,8 @@ export default function Onboarding() {
               >
                 Continue
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

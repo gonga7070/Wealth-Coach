@@ -1,0 +1,37 @@
+{
+  "summary": "End-to-end test of auth-required flow + new 5-step onboarding capturing name/country/goal/help/banks and verifying persistence across logout/login and reflection in Profile + Money pages. Backend: 25/25 pytest cases pass. Frontend: full signup -> onboarding(5 steps) -> dashboard -> profile -> money -> logout -> re-login journey verified. Regression: alex@demo.com still logs in and shows graceful 'Demo accounts' for banks.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Onboarding (Step 5 / banks)",
+        "issue": "Back button (data-testid onboarding-back-btn) is NOT rendered on Step 5. Review request specifies Back should work on steps 2-5. In Onboarding.jsx line 232, the entire footer block (Back + Continue) is wrapped in `step < TOTAL - 1`, so when step===4 (banks) users cannot return to the Help step. Fix: render Back button independently of the Continue button, e.g. show Back whenever step > 0 regardless of final step.",
+        "selector": "[data-testid=onboarding-back-btn]",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Minor: Make the Back button on onboarding Step 5 reachable (move onboarding-back-btn out of the `step < TOTAL - 1` wrapper so it also renders on the final banks step)."
+  ],
+  "critical_code_review_comments": [
+    "server.py /api/auth/guest endpoint still exists even though AuthContext no longer auto-creates guests. If guest auth is deprecated by product spec, consider removing it (or document it as an intentional dev shortcut) — currently anyone can POST /api/auth/guest and create accounts bypassing signup, which is a mild privacy/abuse concern.",
+    "Onboarding.jsx: `if (user === false) { navigate('/login'); return null; }` runs during render — moving this into useEffect would be cleaner React. Not a bug today but will warn in StrictMode.",
+    "seed_user_data wipes and reseeds all collections every time /api/onboarding is called. If a user re-triggers onboarding later, they'd lose their custom goals/transactions. Consider gating by `onboarded` state.",
+    "server.py line 754: CORS allow_origins defaults to '*' but allow_credentials=True — this combination is rejected by browsers. For local/* works, but any real credentialed cookie flow should set explicit origins."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "100% (25/25)", "frontend": "95% (all primary flows pass; 1 minor onboarding Back-button gap on step 5)" },
+  "test_credentials": "alex@demo.com / password123 (seeded demo user). Fresh signups during tests use ui_test_<ts>@example.com / pass1234.",
+  "seed_data_creation": "Created a fresh user per run via /api/auth/register + /api/onboarding (via UI). No manual DB seeding.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Core auth + 5-step onboarding + bank-driven seed verified. UI tests exercise: /app redirect to /login when logged out, Welcome -> Get Started -> register, 5-step onboarding (name prefilled, country canada, goal buy-a-home, help stick-to-a-budget, banks td-bank+revolut), Continue hidden on step 5, connect-accounts-btn disabled until a bank is selected, Profile shows 'Jordan Rivera · Canada' and 'TD Bank, Revolut', Money page uses TD Bank/Revolut as institution labels (no Chase/Ally), logout/login persists name+country+banks, alex@demo.com shows 'Demo accounts' gracefully. Only remaining gap: back button missing on step 5.",
+  "rca of the issue": "Back button not shown on step 5 (banks). Root cause: in /app/frontend/src/pages/Onboarding.jsx the footer navigation block is wrapped in `{step < TOTAL - 1 && (...)}` which hides BOTH the Back and the Continue button on the final step. Mitigation: split the two conditions — always render Back when `step > 0`, and only render Continue when `step < TOTAL - 1`."
+}
