@@ -129,7 +129,6 @@ export default function Layout() {
               </SheetTrigger>
               <SheetContent side="right" className="wc-glass border-white/10 w-72 p-4 overflow-y-auto">
                 <div className="flex items-center gap-3 mb-5">
-                  <OwlAvatar size={38} />
                   <span className="font-head font-bold text-lg">Menu</span>
                 </div>
                 <nav className="space-y-1">
