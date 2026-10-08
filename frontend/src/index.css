@@ -197,3 +197,18 @@ html.light .border-white\/15 { border-color: rgba(17, 20, 28, 0.1) !important; }
 html.light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(17, 20, 28, 0.08) !important; }
 
 html.light ::-webkit-scrollbar-thumb { background: rgba(17, 20, 28, 0.18); }
+
+/* chat bubble + input fade (theme-aware) */
+.wc-bubble {
+  background: #16171C;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e7e9ee;
+}
+html.light .wc-bubble {
+  background: #ffffff;
+  border-color: rgba(17, 20, 28, 0.08);
+  color: #272a33;
+  box-shadow: 0 6px 20px -12px rgba(20, 25, 40, 0.25);
+}
+.wc-chat-fade { background: linear-gradient(to top, #0A0B0D 35%, transparent); }
+html.light .wc-chat-fade { background: linear-gradient(to top, #EEF0F4 35%, transparent); }

@@ -93,7 +93,7 @@ export default function Coach() {
         <div ref={endRef} />
       </div>
 
-      <div className="sticky bottom-0 pt-3 bg-gradient-to-t from-[#090A0F] to-transparent">
+      <div className="sticky bottom-0 pt-3 wc-chat-fade">
         <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex gap-2">
           <Input
             value={input}
@@ -129,7 +129,7 @@ function Bubble({ m }) {
         className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap rounded-2xl ${
           isUser
             ? "bg-amber-500 text-slate-950 rounded-tr-sm font-medium"
-            : "bg-[#16171C] border border-white/8 text-slate-200 rounded-tl-sm"
+            : "wc-bubble rounded-tl-sm"
         }`}
         data-testid={isUser ? "coach-user-msg" : "coach-ai-msg"}
       >
