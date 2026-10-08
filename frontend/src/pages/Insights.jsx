@@ -5,7 +5,7 @@ import api from "@/lib/api";
 import { fmt } from "@/lib/format";
 import { Icon } from "@/lib/icons";
 import { OwlBubble } from "@/components/OwlMascot";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 
@@ -67,6 +67,7 @@ export default function Insights() {
 
       <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>
         <DialogContent className="wc-glass border-white/10 max-w-md" data-testid="insight-dialog">
+          <DialogTitle className="sr-only">Insight details</DialogTitle>
           {active && <InsightDetail ins={active} navigate={navigate} close={() => setActive(null)} />}
         </DialogContent>
       </Dialog>

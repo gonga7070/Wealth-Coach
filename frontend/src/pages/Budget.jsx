@@ -4,7 +4,7 @@ import { fmt } from "@/lib/format";
 import { Bar } from "@/components/Charts";
 import { Icon } from "@/lib/icons";
 import { OwlBubble } from "@/components/OwlMascot";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -90,6 +90,7 @@ export default function Budget() {
 
       <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
         <DialogContent className="wc-glass border-white/10 max-w-sm" data-testid="budget-edit-dialog">
+          <DialogTitle className="sr-only">Edit spending plan</DialogTitle>
           {edit && (
             <div>
               <h3 className="font-head text-xl font-extrabold">{edit.category} plan</h3>

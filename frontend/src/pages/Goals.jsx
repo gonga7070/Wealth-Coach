@@ -6,7 +6,7 @@ import { fmt, relativeMonths } from "@/lib/format";
 import { Bar } from "@/components/Charts";
 import { Icon } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
@@ -118,6 +118,7 @@ function CreateGoalModal({ open, onClose, onCreated }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="wc-glass border-white/10 max-w-md max-h-[90vh] overflow-y-auto" data-testid="create-goal-dialog">
+        <DialogTitle className="sr-only">Create a goal</DialogTitle>
         <h3 className="font-head text-xl font-extrabold">Create a goal</h3>
         <p className="text-sm text-slate-400 -mt-1">Pick a type and we'll do the math.</p>
 

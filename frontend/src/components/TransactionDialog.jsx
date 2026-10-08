@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "@/lib/api";
 import { fmtC, dateLabel } from "@/lib/format";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -35,6 +35,7 @@ export default function TransactionDialog({ txn, open, onOpenChange, onUpdated }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="wc-glass border-white/10 max-w-sm" data-testid="transaction-dialog">
+        <DialogTitle className="sr-only">Transaction details</DialogTitle>
         <div className="text-center pt-2">
           <div className="w-16 h-16 rounded-2xl bg-white/5 grid place-items-center text-2xl font-bold mx-auto mb-3">
             {txn.merchant[0]}
