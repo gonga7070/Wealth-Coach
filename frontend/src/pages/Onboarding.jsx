@@ -137,7 +137,7 @@ export default function Onboarding() {
       </div>
       <div className="mt-7">
         <OwlBubble>
-          Welcome aboard! I'm Athena. I'll help you understand your money and reach{" "}
+          Welcome aboard! I'm Hoot. I'll help you understand your money and reach{" "}
           <span className="text-amber-300 font-semibold">{goal || "your goals"}</span>. Let's dive in.
         </OwlBubble>
       </div>

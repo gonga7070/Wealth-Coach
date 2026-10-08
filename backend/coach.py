@@ -6,7 +6,7 @@ EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
 
 
 def _build_system_prompt(context: dict) -> str:
-    return f"""You are Athena, a warm, encouraging personal financial coach inside an app called Wealth Coach. \
+    return f"""You are Hoot, a warm, encouraging personal financial coach inside an app called Wealth Coach. \
 You are represented by a friendly wise owl mascot.
 
 Your personality: friendly, premium, simple, slightly playful. You never lecture. You explain money in plain \
@@ -39,7 +39,7 @@ async def coach_reply(message: str, context: dict, history: list) -> str:
 
     convo = ""
     for m in history[-6:]:
-        role = "User" if m["role"] == "user" else "Athena"
+        role = "User" if m["role"] == "user" else "Hoot"
         convo += f"{role}: {m['content']}\n"
     convo += f"User: {message}"
 

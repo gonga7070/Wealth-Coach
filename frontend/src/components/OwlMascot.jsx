@@ -8,12 +8,12 @@ export function OwlAvatar({ size = 48, className = "", float = false }) {
       style={{ width: size, height: size, border: "1px solid rgba(255,255,255,0.1)" }}
       data-testid="owl-avatar"
     >
-      <img src={OWL} alt="Athena the owl" className="w-full h-full object-cover" />
+      <img src={OWL} alt="Hoot the owl" className="w-full h-full object-cover" />
     </div>
   );
 }
 
-export function OwlBubble({ children, name = "Athena", className = "" }) {
+export function OwlBubble({ children, name = "Hoot", className = "" }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}

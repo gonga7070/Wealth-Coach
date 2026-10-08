@@ -51,7 +51,7 @@ export default function Coach() {
       <div className="flex items-center gap-3 mb-4">
         <OwlAvatar size={48} float />
         <div>
-          <h1 className="font-head text-xl font-extrabold">Ask Athena</h1>
+          <h1 className="font-head text-xl font-extrabold">Ask Hoot</h1>
           <p className="text-sm text-slate-400">Your personal money coach</p>
         </div>
       </div>

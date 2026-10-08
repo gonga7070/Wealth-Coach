@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner";
 
 const FEATURES = [
-  { icon: InfIcon, t: "Unlimited AI coaching", d: "Ask Athena as much as you want." },
+  { icon: InfIcon, t: "Unlimited AI coaching", d: "Ask Hoot as much as you want." },
   { icon: Sparkles, t: "Advanced insights", d: "Deeper patterns in your spending." },
   { icon: LineChart, t: "Advanced analytics", d: "Trends across months and categories." },
   { icon: RefreshCw, t: "Subscription detection", d: "Automatically flag forgotten subs." },
@@ -52,7 +52,7 @@ export default function Premium() {
         </span>
         <h1 className="font-head text-3xl font-extrabold">Unlock your full coach</h1>
         <p className="text-slate-400 mt-2 max-w-sm mx-auto">
-          Everything you need to truly understand and grow your money — guided by Athena.
+          Everything you need to truly understand and grow your money — guided by Hoot.
         </p>
         <div className="mt-6 flex items-end justify-center gap-1">
           <span className="font-num text-4xl font-extrabold wc-gold-text">$9</span>

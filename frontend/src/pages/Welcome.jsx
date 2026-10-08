@@ -33,7 +33,7 @@ export default function Welcome() {
           className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden mb-8 ring-2 ring-amber-400/30 wc-float"
           style={{ boxShadow: "0 0 60px rgba(99,102,241,0.3)" }}
         >
-          <img src={OWL} alt="Athena the owl" className="w-full h-full object-cover" />
+          <img src={OWL} alt="Hoot the owl" className="w-full h-full object-cover" />
         </motion.div>
 
         <motion.h1
