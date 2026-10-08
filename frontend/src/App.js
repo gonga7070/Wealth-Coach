@@ -1,6 +1,7 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
 import Layout from "@/components/Layout";
 import Auth from "@/pages/Auth";
@@ -76,11 +77,13 @@ function Routing() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routing />
-        <Toaster position="top-center" theme="dark" />
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routing />
+          <Toaster position="top-center" theme="dark" />
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

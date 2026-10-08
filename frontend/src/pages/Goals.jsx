@@ -105,9 +105,9 @@ export default function Goals() {
                       <Icon name={g.icon} size={18} />
                     </div>
                     <div className="min-w-0">
-                      <div className="font-head font-bold text-lg leading-tight drop-shadow truncate">{g.name}</div>
-                      <div className="font-num text-xs text-slate-200/90 drop-shadow">
-                        {fmt(g.current)} <span className="text-slate-300/70">/ {fmt(g.target)}</span>
+                      <div className="font-head font-bold text-lg leading-tight drop-shadow truncate" style={{ color: "#fff" }}>{g.name}</div>
+                      <div className="font-num text-xs drop-shadow" style={{ color: "rgba(255,255,255,0.9)" }}>
+                        {fmt(g.current)} <span style={{ color: "rgba(255,255,255,0.65)" }}>/ {fmt(g.target)}</span>
                       </div>
                     </div>
                   </div>

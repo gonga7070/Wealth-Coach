@@ -81,7 +81,7 @@ export default function GoalDetails() {
             <div className="w-11 h-11 rounded-xl grid place-items-center backdrop-blur-md" style={{ background: `${g.color}2e`, color: "#fff", border: `1px solid ${g.color}66` }}>
               <Icon name={g.icon} size={22} />
             </div>
-            <h1 className="font-head text-2xl font-extrabold drop-shadow">{g.name}</h1>
+            <h1 className="font-head text-2xl font-extrabold drop-shadow" style={{ color: "#fff" }}>{g.name}</h1>
           </div>
         </div>
         <div className="flex flex-col items-center text-center p-6">

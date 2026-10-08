@@ -1,14 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import api from "@/lib/api";
 import { OwlAvatar } from "@/components/OwlMascot";
 import {
-  User, Link2, Bell, Shield, Lock, Brain, Crown, Download, Trash2, RefreshCw, ChevronRight, LogOut,
+  User, Link2, Bell, Shield, Lock, Brain, Crown, Download, Trash2, RefreshCw, ChevronRight, LogOut, Moon, Sun,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Profile() {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const resetDemo = async () => {
@@ -72,6 +74,37 @@ export default function Profile() {
           <ChevronRight size={18} className="text-slate-500" />
         </button>
       )}
+
+      {/* Appearance */}
+      <div>
+        <h3 className="text-sm font-semibold text-slate-400 mb-2 px-1">Appearance</h3>
+        <div className="wc-card p-5 flex items-center justify-between">
+          <div>
+            <div className="font-medium">Theme</div>
+            <div className="text-xs text-slate-500">Choose how Wealth Coach looks</div>
+          </div>
+          <div className="inline-flex p-1 rounded-full bg-white/5 border border-white/8" data-testid="theme-toggle">
+            <button
+              onClick={() => setTheme("dark")}
+              data-testid="theme-dark-btn"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition ${
+                theme === "dark" ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Moon size={15} /> Dark
+            </button>
+            <button
+              onClick={() => setTheme("light")}
+              data-testid="theme-light-btn"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition ${
+                theme === "light" ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Sun size={15} /> Light
+            </button>
+          </div>
+        </div>
+      </div>
 
       {groups.map((g) => (
         <div key={g.title}>

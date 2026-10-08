@@ -134,3 +134,66 @@ h1, h2, h3, h4, .font-head {
 }
 
 .wc-ring { transform: rotate(-90deg); }
+
+/* ---------------- Light mode ---------------- */
+html.light body {
+  background-color: #EEF0F4;
+  color: #161922;
+}
+html.light .wc-app-bg {
+  background:
+    radial-gradient(1100px 560px at 82% -12%, rgba(179, 154, 255, 0.14), transparent 58%),
+    radial-gradient(950px 480px at -12% 8%, rgba(120, 200, 255, 0.14), transparent 55%),
+    #EEF0F4;
+}
+html.light .wc-card {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(17, 20, 28, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px -16px rgba(20, 25, 40, 0.2);
+}
+html.light .wc-card::before {
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(17, 20, 28, 0.05) 26%,
+    rgba(17, 20, 28, 0) 52%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+}
+html.light .wc-card-hover:hover {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 18px 44px -16px rgba(20, 25, 40, 0.28);
+}
+html.light .wc-glass {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+/* text scale → dark inks */
+html.light .text-white { color: #161922; }
+html.light .text-slate-100 { color: #1b1e26; }
+html.light .text-slate-200 { color: #272a33; }
+html.light .text-slate-300 { color: #3b4150; }
+html.light .text-slate-400 { color: #596070; }
+html.light .text-slate-500 { color: #6b7280; }
+html.light .text-slate-600 { color: #99a0ac; }
+html.light .hover\:text-white:hover { color: #161922; }
+
+/* overlay surfaces → subtle dark tints */
+html.light .bg-white\/5,
+html.light .bg-white\/10,
+html.light .bg-white\/\[0\.03\],
+html.light .bg-white\/\[0\.06\] { background-color: rgba(17, 20, 28, 0.05) !important; }
+html.light .hover\:bg-white\/5:hover,
+html.light .hover\:bg-white\/10:hover { background-color: rgba(17, 20, 28, 0.07) !important; }
+
+/* borders */
+html.light .border-white\/5,
+html.light .border-white\/8,
+html.light .border-white\/10,
+html.light .border-white\/12,
+html.light .border-white\/15 { border-color: rgba(17, 20, 28, 0.1) !important; }
+
+/* dividers */
+html.light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(17, 20, 28, 0.08) !important; }
+
+html.light ::-webkit-scrollbar-thumb { background: rgba(17, 20, 28, 0.18); }

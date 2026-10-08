@@ -30,9 +30,9 @@ export default function Investing() {
             <img src={INVEST_HERO} alt="Investments" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,11,13,0.25) 0%, rgba(10,11,13,0.55) 50%, rgba(19,20,26,0.96) 100%)" }} />
             <div className="absolute bottom-4 left-5">
-              <p className="text-xs uppercase tracking-wide text-slate-300 drop-shadow">Your investments · {h.institution}</p>
-              <div className="font-num text-3xl font-extrabold mt-1 drop-shadow">{fmt(h.balance)}</div>
-              <p className="text-sm text-slate-300/80 mt-0.5 drop-shadow">{h.name} — tap to view activity</p>
+              <p className="text-xs uppercase tracking-wide drop-shadow" style={{ color: "rgba(255,255,255,0.85)" }}>Your investments · {h.institution}</p>
+              <div className="font-num text-3xl font-extrabold mt-1 drop-shadow" style={{ color: "#fff" }}>{fmt(h.balance)}</div>
+              <p className="text-sm mt-0.5 drop-shadow" style={{ color: "rgba(255,255,255,0.8)" }}>{h.name} — tap to view activity</p>
             </div>
           </div>
         </button>
