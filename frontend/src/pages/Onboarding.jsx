@@ -30,19 +30,26 @@ const HELP = [
 ];
 
 const COUNTRIES = [
-  { c: "United States", f: "🇺🇸" }, { c: "United Kingdom", f: "🇬🇧" }, { c: "Canada", f: "🇨🇦" },
-  { c: "Australia", f: "🇦🇺" }, { c: "Ireland", f: "🇮🇪" }, { c: "Germany", f: "🇩🇪" },
-  { c: "France", f: "🇫🇷" }, { c: "Spain", f: "🇪🇸" }, { c: "Italy", f: "🇮🇹" },
-  { c: "Netherlands", f: "🇳🇱" }, { c: "India", f: "🇮🇳" }, { c: "Singapore", f: "🇸🇬" },
-  { c: "UAE", f: "🇦🇪" }, { c: "Japan", f: "🇯🇵" }, { c: "Brazil", f: "🇧🇷" },
-  { c: "Mexico", f: "🇲🇽" }, { c: "South Africa", f: "🇿🇦" }, { c: "New Zealand", f: "🇳🇿" },
+  { c: "United States", f: "🇺🇸" },
+  { c: "United Kingdom", f: "🇬🇧" },
+  { c: "Canada", f: "🇨🇦" },
+  { c: "Australia", f: "🇦🇺" },
+  { c: "Ireland", f: "🇮🇪" },
+  { c: "New Zealand", f: "🇳🇿" },
+  { c: "South Africa", f: "🇿🇦" },
+  { c: "Singapore", f: "🇸🇬" },
 ];
 
-const BANKS = [
-  "Chase", "Bank of America", "Wells Fargo", "Citi", "Capital One", "American Express",
-  "Ally Bank", "US Bank", "PNC", "TD Bank", "HSBC", "Barclays",
-  "Fidelity", "Charles Schwab", "Revolut", "Monzo",
-];
+const BANKS_BY_COUNTRY = {
+  "United States": ["Chase", "Bank of America", "Wells Fargo", "Citi", "Capital One", "American Express", "US Bank", "PNC", "Ally Bank", "Charles Schwab", "Fidelity"],
+  "United Kingdom": ["Barclays", "HSBC", "Lloyds", "NatWest", "Santander", "Halifax", "Nationwide", "Monzo", "Starling", "Revolut"],
+  "Canada": ["RBC", "TD Canada Trust", "Scotiabank", "BMO", "CIBC", "Tangerine", "National Bank", "Desjardins"],
+  "Australia": ["Commonwealth Bank", "Westpac", "NAB", "ANZ", "Macquarie", "Bendigo Bank", "ING Australia"],
+  "Ireland": ["AIB", "Bank of Ireland", "Permanent TSB", "An Post Money", "Revolut"],
+  "New Zealand": ["ANZ", "ASB", "BNZ", "Westpac NZ", "Kiwibank"],
+  "South Africa": ["Standard Bank", "FNB", "Absa", "Nedbank", "Capitec", "Discovery Bank"],
+  "Singapore": ["DBS", "OCBC", "UOB", "Standard Chartered", "Citibank", "Revolut"],
+};
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -61,6 +68,8 @@ export default function Onboarding() {
     setHelp((p) => (p.includes(h) ? p.filter((x) => x !== h) : [...p, h]));
   const toggleBank = (b) =>
     setBanks((p) => (p.includes(b) ? p.filter((x) => x !== b) : [...p, b]));
+
+  const countryBanks = BANKS_BY_COUNTRY[country] || [];
 
   const finish = async (withBanks) => {
     setLoading(true);
@@ -103,7 +112,7 @@ export default function Onboarding() {
         {COUNTRIES.map((co) => (
           <button
             key={co.c}
-            onClick={() => setCountry(co.c)}
+            onClick={() => { setCountry(co.c); setBanks([]); }}
             data-testid={`country-${co.c.toLowerCase().replace(/ /g, "-")}`}
             className={`wc-card p-3.5 flex items-center gap-2.5 text-left transition-all ${
               country === co.c ? "border-amber-500/60 bg-amber-500/10" : "wc-card-hover"
@@ -162,9 +171,9 @@ export default function Onboarding() {
     // Step 4: banks + connect
     <div key="s4">
       <h1 className="font-head text-3xl font-extrabold">Connect your banks</h1>
-      <p className="text-slate-400 mt-2 mb-5">Pick the banks you use. We'll set up matching demo accounts.</p>
+      <p className="text-slate-400 mt-2 mb-5">Pick the banks you use in {country || "your country"}. We'll set up matching demo accounts.</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[38vh] overflow-y-auto pr-1 mb-5">
-        {BANKS.map((b) => (
+        {countryBanks.map((b) => (
           <button
             key={b}
             onClick={() => toggleBank(b)}
