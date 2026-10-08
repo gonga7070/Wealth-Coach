@@ -22,8 +22,8 @@ export default function Profile() {
     {
       title: "Account",
       items: [
-        { icon: User, label: "Personal information", sub: user?.email },
-        { icon: Link2, label: "Connected accounts", sub: "5 demo accounts" },
+        { icon: User, label: "Personal information", sub: `${user?.name || ""}${user?.country ? " · " + user.country : ""}` },
+        { icon: Link2, label: "Connected banks", sub: user?.banks?.length ? user.banks.join(", ") : "Demo accounts" },
         { icon: Bell, label: "Notifications", onClick: () => navigate("/app/notifications") },
       ],
     },

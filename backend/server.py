@@ -98,6 +98,9 @@ class OnboardingReq(BaseModel):
     primary_goal: str
     help_with: List[str] = []
     use_demo: bool = True
+    name: Optional[str] = None
+    country: Optional[str] = None
+    banks: List[str] = []
 
 
 class CategoryUpdate(BaseModel):
@@ -136,7 +139,7 @@ class ChatReq(BaseModel):
 
 
 # ---------------- Seeding ----------------
-async def seed_user_data(user_id: str, primary_goal: str):
+async def seed_user_data(user_id: str, primary_goal: str, banks=None):
     await db.accounts.delete_many({"user_id": user_id})
     await db.transactions.delete_many({"user_id": user_id})
     await db.goals.delete_many({"user_id": user_id})
@@ -144,7 +147,7 @@ async def seed_user_data(user_id: str, primary_goal: str):
     await db.recurring.delete_many({"user_id": user_id})
     await db.notifications.delete_many({"user_id": user_id})
 
-    data = seed_mod.build_demo_data(user_id, primary_goal)
+    data = seed_mod.build_demo_data(user_id, primary_goal, banks)
     res = await db.accounts.insert_many(data["accounts"])
     acct_ids = [str(i) for i in res.inserted_ids]
     checking_id = acct_ids[0]
@@ -347,15 +350,18 @@ async def guest():
 @api.get("/auth/me")
 async def me(user: dict = Depends(get_current_user)):
     return {"id": user["id"], "name": user["name"], "email": user["email"],
-            "onboarded": user.get("onboarded", False), "plus": user.get("plus", False)}
+            "onboarded": user.get("onboarded", False), "plus": user.get("plus", False),
+            "country": user.get("country"), "banks": user.get("banks", [])}
 
 
 @api.post("/onboarding")
 async def onboarding(req: OnboardingReq, user: dict = Depends(get_current_user)):
-    await db.users.update_one({"_id": oid(user["id"])},
-                              {"$set": {"onboarded": True, "primary_goal": req.primary_goal,
-                                        "help_with": req.help_with}})
-    await seed_user_data(user["id"], req.primary_goal)
+    updates = {"onboarded": True, "primary_goal": req.primary_goal, "help_with": req.help_with,
+               "country": req.country, "banks": req.banks}
+    if req.name:
+        updates["name"] = req.name
+    await db.users.update_one({"_id": oid(user["id"])}, {"$set": updates})
+    await seed_user_data(user["id"], req.primary_goal, req.banks)
     return {"ok": True}
 
 
@@ -736,7 +742,7 @@ async def upgrade(user: dict = Depends(get_current_user)):
 @api.post("/profile/reset-demo")
 async def reset_demo(user: dict = Depends(get_current_user)):
     u = await db.users.find_one({"_id": oid(user["id"])})
-    await seed_user_data(user["id"], u.get("primary_goal", "Save more"))
+    await seed_user_data(user["id"], u.get("primary_goal", "Save more"), u.get("banks"))
     return {"ok": True}
 
 

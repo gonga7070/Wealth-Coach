@@ -30,13 +30,18 @@ def _dt(days_ago):
     return (datetime.now(timezone.utc) - timedelta(days=days_ago)).isoformat()
 
 
-def build_demo_data(user_id, primary_goal="Save more"):
+def build_demo_data(user_id, primary_goal="Save more", banks=None):
+    banks = [b for b in (banks or []) if b] or ["Chase", "Ally Bank", "Fidelity", "Capital One"]
+
+    def bank(i):
+        return banks[i % len(banks)]
+
     accounts = [
-        {"user_id": user_id, "name": "Everyday Checking", "type": "checking", "institution": "Chase", "mask": "4821", "balance": 4820.55},
-        {"user_id": user_id, "name": "High-Yield Savings", "type": "savings", "institution": "Ally Bank", "mask": "9903", "balance": 12450.00},
-        {"user_id": user_id, "name": "Sapphire Credit Card", "type": "credit", "institution": "Chase", "mask": "1178", "balance": -1842.30},
-        {"user_id": user_id, "name": "Brokerage", "type": "investment", "institution": "Fidelity", "mask": "5521", "balance": 28730.40},
-        {"user_id": user_id, "name": "Auto Loan", "type": "loan", "institution": "Capital One", "mask": "3300", "balance": -8600.00},
+        {"user_id": user_id, "name": "Everyday Checking", "type": "checking", "institution": bank(0), "mask": "4821", "balance": 4820.55},
+        {"user_id": user_id, "name": "High-Yield Savings", "type": "savings", "institution": bank(0), "mask": "9903", "balance": 12450.00},
+        {"user_id": user_id, "name": "Rewards Credit Card", "type": "credit", "institution": bank(1), "mask": "1178", "balance": -1842.30},
+        {"user_id": user_id, "name": "Brokerage", "type": "investment", "institution": bank(2), "mask": "5521", "balance": 28730.40},
+        {"user_id": user_id, "name": "Auto Loan", "type": "loan", "institution": bank(3), "mask": "3300", "balance": -8600.00},
     ]
     return {"accounts": accounts}
 

@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
 import Layout from "@/components/Layout";
+import Welcome from "@/pages/Welcome";
 import Auth from "@/pages/Auth";
 import Onboarding from "@/pages/Onboarding";
 import Home from "@/pages/Home";
@@ -49,7 +50,7 @@ function PublicOnly({ children }) {
 function Routing() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/app" replace />} />
+      <Route path="/" element={<Welcome />} />
       <Route path="/login" element={<PublicOnly><Auth mode="login" /></PublicOnly>} />
       <Route path="/register" element={<PublicOnly><Auth mode="register" /></PublicOnly>} />
       <Route path="/onboarding" element={<Onboarding />} />

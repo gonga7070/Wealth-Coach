@@ -5,8 +5,9 @@ import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { OwlBubble } from "@/components/OwlMascot";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-  PiggyBank, CreditCard, Home, Car, Plane, TrendingUp, Check, Database, Link2,
+  PiggyBank, CreditCard, Home, Car, Plane, TrendingUp, Check, Database, Building2, User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,24 +29,47 @@ const HELP = [
   "Reach a savings goal",
 ];
 
+const COUNTRIES = [
+  { c: "United States", f: "🇺🇸" }, { c: "United Kingdom", f: "🇬🇧" }, { c: "Canada", f: "🇨🇦" },
+  { c: "Australia", f: "🇦🇺" }, { c: "Ireland", f: "🇮🇪" }, { c: "Germany", f: "🇩🇪" },
+  { c: "France", f: "🇫🇷" }, { c: "Spain", f: "🇪🇸" }, { c: "Italy", f: "🇮🇹" },
+  { c: "Netherlands", f: "🇳🇱" }, { c: "India", f: "🇮🇳" }, { c: "Singapore", f: "🇸🇬" },
+  { c: "UAE", f: "🇦🇪" }, { c: "Japan", f: "🇯🇵" }, { c: "Brazil", f: "🇧🇷" },
+  { c: "Mexico", f: "🇲🇽" }, { c: "South Africa", f: "🇿🇦" }, { c: "New Zealand", f: "🇳🇿" },
+];
+
+const BANKS = [
+  "Chase", "Bank of America", "Wells Fargo", "Citi", "Capital One", "American Express",
+  "Ally Bank", "US Bank", "PNC", "TD Bank", "HSBC", "Barclays",
+  "Fidelity", "Charles Schwab", "Revolut", "Monzo",
+];
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
   const [step, setStep] = useState(0);
+  const [name, setName] = useState(user?.name || "");
+  const [country, setCountry] = useState(user?.country || "");
   const [goal, setGoal] = useState("");
   const [help, setHelp] = useState([]);
+  const [banks, setBanks] = useState([]);
   const [loading, setLoading] = useState(false);
 
   if (user === false) { navigate("/login"); return null; }
 
   const toggleHelp = (h) =>
     setHelp((p) => (p.includes(h) ? p.filter((x) => x !== h) : [...p, h]));
+  const toggleBank = (b) =>
+    setBanks((p) => (p.includes(b) ? p.filter((x) => x !== b) : [...p, b]));
 
-  const finish = async () => {
+  const finish = async (withBanks) => {
     setLoading(true);
     try {
-      await api.post("/onboarding", { primary_goal: goal, help_with: help, use_demo: true });
-      setUser({ ...user, onboarded: true });
+      await api.post("/onboarding", {
+        primary_goal: goal, help_with: help, use_demo: true,
+        name: name.trim(), country, banks: withBanks,
+      });
+      setUser({ ...user, onboarded: true, name: name.trim(), country, banks: withBanks });
       navigate("/app");
     } catch {
       toast.error("Couldn't finish setup. Try again.");
@@ -54,9 +78,45 @@ export default function Onboarding() {
     }
   };
 
+  const TOTAL = 5;
+
   const steps = [
-    // Step 1: goal
+    // Step 0: name
+    <div key="s0">
+      <div className="w-12 h-12 rounded-xl bg-amber-500/15 grid place-items-center text-amber-400 mb-4"><User size={24} /></div>
+      <h1 className="font-head text-3xl font-extrabold">First, what should we call you?</h1>
+      <p className="text-slate-400 mt-2 mb-7">Hoot likes to keep things personal.</p>
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        data-testid="onboarding-name-input"
+        placeholder="Your name"
+        className="h-12 bg-white/5 border-white/12 rounded-xl text-lg"
+        autoFocus
+      />
+    </div>,
+    // Step 1: country
     <div key="s1">
+      <h1 className="font-head text-3xl font-extrabold">Where are you based?</h1>
+      <p className="text-slate-400 mt-2 mb-6">This helps us tailor currency and tips.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[52vh] overflow-y-auto pr-1">
+        {COUNTRIES.map((co) => (
+          <button
+            key={co.c}
+            onClick={() => setCountry(co.c)}
+            data-testid={`country-${co.c.toLowerCase().replace(/ /g, "-")}`}
+            className={`wc-card p-3.5 flex items-center gap-2.5 text-left transition-all ${
+              country === co.c ? "border-amber-500/60 bg-amber-500/10" : "wc-card-hover"
+            }`}
+          >
+            <span className="text-xl">{co.f}</span>
+            <span className="text-sm font-medium truncate">{co.c}</span>
+          </button>
+        ))}
+      </div>
+    </div>,
+    // Step 2: goal
+    <div key="s2">
       <h1 className="font-head text-3xl font-extrabold">What's your biggest money goal?</h1>
       <p className="text-slate-400 mt-2 mb-7">Pick one. You can always change it later.</p>
       <div className="grid grid-cols-2 gap-3">
@@ -75,8 +135,8 @@ export default function Onboarding() {
         ))}
       </div>
     </div>,
-    // Step 2: help
-    <div key="s2">
+    // Step 3: help
+    <div key="s3">
       <h1 className="font-head text-3xl font-extrabold">What do you want help with?</h1>
       <p className="text-slate-400 mt-2 mb-7">Choose as many as you like.</p>
       <div className="grid grid-cols-1 gap-2.5">
@@ -99,58 +159,59 @@ export default function Onboarding() {
         ))}
       </div>
     </div>,
-    // Step 3: connect
-    <div key="s3">
-      <h1 className="font-head text-3xl font-extrabold">Connect your accounts</h1>
-      <p className="text-slate-400 mt-2 mb-7">
-        We'll load a realistic demo so you can explore everything right away.
-      </p>
+    // Step 4: banks + connect
+    <div key="s4">
+      <h1 className="font-head text-3xl font-extrabold">Connect your banks</h1>
+      <p className="text-slate-400 mt-2 mb-5">Pick the banks you use. We'll set up matching demo accounts.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[38vh] overflow-y-auto pr-1 mb-5">
+        {BANKS.map((b) => (
+          <button
+            key={b}
+            onClick={() => toggleBank(b)}
+            data-testid={`bank-${b.toLowerCase().replace(/ /g, "-")}`}
+            className={`wc-card p-3.5 flex items-center gap-2.5 text-left transition-all ${
+              banks.includes(b) ? "border-amber-500/60 bg-amber-500/10" : "wc-card-hover"
+            }`}
+          >
+            <Building2 size={18} className={banks.includes(b) ? "text-amber-400" : "text-slate-400"} />
+            <span className="text-sm font-medium truncate">{b}</span>
+          </button>
+        ))}
+      </div>
       <div className="space-y-3">
+        <Button
+          onClick={() => finish(banks)}
+          disabled={loading || banks.length === 0}
+          data-testid="connect-accounts-btn"
+          className="w-full h-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold"
+        >
+          {loading ? "Setting up…" : banks.length ? `Connect ${banks.length} bank${banks.length > 1 ? "s" : ""}` : "Select a bank"}
+        </Button>
         <button
-          onClick={finish}
+          onClick={() => finish([])}
           disabled={loading}
           data-testid="use-demo-btn"
-          className="w-full wc-card wc-card-hover p-5 flex items-center gap-4 text-left border-amber-500/40"
+          className="w-full flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-white py-2"
         >
-          <div className="w-11 h-11 rounded-xl bg-amber-500/15 grid place-items-center text-amber-400">
-            <Database size={22} />
-          </div>
-          <div>
-            <div className="font-semibold">Use Demo Data</div>
-            <div className="text-sm text-slate-400">Explore with realistic accounts & transactions</div>
-          </div>
-        </button>
-        <button
-          onClick={() => { toast("Bank linking is demo-only — loading demo data for you"); finish(); }}
-          disabled={loading}
-          data-testid="connect-accounts-btn"
-          className="w-full wc-card wc-card-hover p-5 flex items-center gap-4 text-left"
-        >
-          <div className="w-11 h-11 rounded-xl bg-indigo-500/15 grid place-items-center text-indigo-400">
-            <Link2 size={22} />
-          </div>
-          <div>
-            <div className="font-semibold">Connect Accounts</div>
-            <div className="text-sm text-slate-400">Securely link your bank (demo)</div>
-          </div>
+          <Database size={15} /> Skip — just use demo data
         </button>
       </div>
-      <div className="mt-7">
+      <div className="mt-6">
         <OwlBubble>
-          Welcome aboard! I'm Hoot. I'll help you understand your money and reach{" "}
-          <span className="text-amber-300 font-semibold">{goal || "your goals"}</span>. Let's dive in.
+          Nice to meet you{name ? `, ${name.split(" ")[0]}` : ""}! I'm Hoot. I'll help you reach{" "}
+          <span className="text-amber-400 font-semibold">{goal || "your goals"}</span>. Let's dive in.
         </OwlBubble>
       </div>
     </div>,
   ];
 
-  const canNext = step === 0 ? !!goal : true;
+  const canNext = step === 0 ? name.trim().length > 1 : step === 1 ? !!country : step === 2 ? !!goal : true;
 
   return (
     <div className="wc-app-bg min-h-screen flex flex-col">
       <div className="px-6 pt-6">
         <div className="max-w-lg mx-auto flex gap-2">
-          {[0, 1, 2].map((i) => (
+          {Array.from({ length: TOTAL }).map((_, i) => (
             <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-amber-500" : "bg-white/10"}`} />
           ))}
         </div>
@@ -168,7 +229,7 @@ export default function Onboarding() {
             </motion.div>
           </AnimatePresence>
 
-          {step < 2 && (
+          {step < TOTAL - 1 && (
             <div className="flex gap-3 mt-8">
               {step > 0 && (
                 <Button
