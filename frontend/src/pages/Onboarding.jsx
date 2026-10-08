@@ -31,24 +31,12 @@ const HELP = [
 
 const COUNTRIES = [
   { c: "United States", f: "🇺🇸" },
-  { c: "United Kingdom", f: "🇬🇧" },
   { c: "Canada", f: "🇨🇦" },
-  { c: "Australia", f: "🇦🇺" },
-  { c: "Ireland", f: "🇮🇪" },
-  { c: "New Zealand", f: "🇳🇿" },
-  { c: "South Africa", f: "🇿🇦" },
-  { c: "Singapore", f: "🇸🇬" },
 ];
 
 const BANKS_BY_COUNTRY = {
   "United States": ["Chase", "Bank of America", "Wells Fargo", "Citi", "Capital One", "American Express", "US Bank", "PNC", "Ally Bank", "Charles Schwab", "Fidelity"],
-  "United Kingdom": ["Barclays", "HSBC", "Lloyds", "NatWest", "Santander", "Halifax", "Nationwide", "Monzo", "Starling", "Revolut"],
   "Canada": ["RBC", "TD Canada Trust", "Scotiabank", "BMO", "CIBC", "Tangerine", "National Bank", "Desjardins"],
-  "Australia": ["Commonwealth Bank", "Westpac", "NAB", "ANZ", "Macquarie", "Bendigo Bank", "ING Australia"],
-  "Ireland": ["AIB", "Bank of Ireland", "Permanent TSB", "An Post Money", "Revolut"],
-  "New Zealand": ["ANZ", "ASB", "BNZ", "Westpac NZ", "Kiwibank"],
-  "South Africa": ["Standard Bank", "FNB", "Absa", "Nedbank", "Capitec", "Discovery Bank"],
-  "Singapore": ["DBS", "OCBC", "UOB", "Standard Chartered", "Citibank", "Revolut"],
 };
 
 export default function Onboarding() {
