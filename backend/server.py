@@ -12,6 +12,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime, timezone, timedelta
 from bson import ObjectId
+import asyncio
 import bcrypt
 import jwt
 import logging
@@ -786,15 +787,19 @@ async def plaid_exchange(req: PlaidExchangeReq, user: dict = Depends(get_current
         acc = await plaid.plaid_request("/accounts/get", {"access_token": access_token})
         plaid_accounts = acc.get("accounts", [])
 
-        # pull transactions
+        # pull transactions — a freshly linked item needs a few seconds before
+        # its initial transactions are ready, so poll until data arrives.
         added, cursor = [], ""
-        for _ in range(10):
+        for attempt in range(10):
             page = await plaid.plaid_request("/transactions/sync", {
                 "access_token": access_token, "cursor": cursor, "count": 500})
             added += page.get("added", [])
             cursor = page.get("next_cursor", cursor)
-            if not page.get("has_more"):
+            if page.get("has_more"):
+                continue
+            if added or attempt == 9:
                 break
+            await asyncio.sleep(2)
     except plaid.PlaidError as e:
         raise HTTPException(status_code=502, detail=e.message)
 

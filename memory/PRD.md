@@ -32,9 +32,17 @@ Money overview & net worth · spending breakdown · AI insights · goals (create
 - Responsive: desktop sidebar + mobile bottom nav with center owl + more-menu sheet.
 - **Tested:** 25/25 backend pytest pass; all frontend flows verified. No critical bugs.
 
+## Plaid bank connection (DONE — 2026-06, Sandbox)
+- Env: PLAID_CLIENT_ID / PLAID_SECRET / PLAID_ENV (=sandbox) + TOKEN_ENCRYPTION_KEY (Fernet). Secrets backend-only.
+- Backend: `plaid_client.py` (httpx calls, token encrypt/decrypt, account/txn mapping) + routes in server.py: `/api/plaid/status|link-token|exchange|disconnect`. All user-scoped via user["id"]; access_token encrypted at rest in `plaid_items`.
+- Frontend: `components/PlaidConnect.jsx` (react-plaid-link) on Money page — "Connect Bank" button opens Plaid Link; on success exchanges public_token, imports accounts + 90d transactions, shows connected/Disconnect state.
+- Exchange polls `/transactions/sync` (retry + 2s sleep) so freshly-linked sandbox items capture initial transactions.
+- First real connect replaces demo accounts/transactions with live Plaid data; dashboard/net worth reflect it.
+- **Tested (2026-06):** full sandbox flow via API (link-token, sandbox public_token, exchange → 14 accounts + 16 txns), UI connected state screenshot, disconnect + reset-demo restores demo. Test account alex left disconnected/demo.
+
 ## Backlog / Remaining
-- **P1:** Streaming AI responses (currently full-response). Split server.py into routers. Short-lived cache for compute_overview.
-- **P2:** Real bank linking (Plaid) — currently demo/manual. Real payments for Plus. Rate limiting on auth/coach. Password strength policy. Multi-month analytics/trends.
+- **P1:** Streaming AI responses (currently full-response). Split server.py into routers. Short-lived cache for compute_overview. Plaid webhook (SYNC_UPDATES_AVAILABLE) + stored cursor for ongoing txn sync. Production Plaid credentials + OAuth banks.
+- **P2:** Real payments for Plus. Rate limiting on auth/coach. Password strength policy. Multi-month analytics/trends.
 
 ## Next Tasks
 - Add streaming to the coach chat for a more "alive" feel.
