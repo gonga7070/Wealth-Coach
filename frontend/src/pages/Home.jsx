@@ -95,6 +95,16 @@ export default function Home() {
         </div>
       </motion.div>
 
+      {data.accounts.length === 0 && (
+        <motion.div variants={item} className="wc-card p-6 border-amber-500/30" data-testid="home-empty-state">
+          <h3 className="font-head text-xl font-bold">Let's add your money</h3>
+          <p className="text-sm text-slate-400 mt-1">Connect a bank or add an account to see your real dashboard — everything here updates from your own data.</p>
+          <button onClick={() => navigate("/app/money")} data-testid="home-connect-cta" className="mt-4 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-5 py-2.5 text-sm">
+            Connect or add accounts
+          </button>
+        </motion.div>
+      )}
+
       {/* Net worth + health score */}
       <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="wc-card p-6 md:col-span-2" data-testid="networth-card">

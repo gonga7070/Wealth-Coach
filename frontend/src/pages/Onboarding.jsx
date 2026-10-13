@@ -7,7 +7,7 @@ import { OwlBubble } from "@/components/OwlMascot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  PiggyBank, CreditCard, Home, Car, Plane, TrendingUp, Check, Database, Building2, User,
+  PiggyBank, CreditCard, Home, Car, Plane, TrendingUp, Check, Database, Landmark, User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,11 +34,6 @@ const COUNTRIES = [
   { c: "Canada", f: "🇨🇦" },
 ];
 
-const BANKS_BY_COUNTRY = {
-  "United States": ["Chase", "Bank of America", "Wells Fargo", "Citi", "Capital One", "American Express", "US Bank", "PNC", "Ally Bank", "Charles Schwab", "Fidelity"],
-  "Canada": ["RBC", "TD Canada Trust", "Scotiabank", "BMO", "CIBC", "Tangerine", "National Bank", "Desjardins"],
-};
-
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
@@ -47,27 +42,24 @@ export default function Onboarding() {
   const [country, setCountry] = useState(user?.country || "");
   const [goal, setGoal] = useState("");
   const [help, setHelp] = useState([]);
-  const [banks, setBanks] = useState([]);
   const [loading, setLoading] = useState(false);
 
   if (user === false) { navigate("/login"); return null; }
 
   const toggleHelp = (h) =>
     setHelp((p) => (p.includes(h) ? p.filter((x) => x !== h) : [...p, h]));
-  const toggleBank = (b) =>
-    setBanks((p) => (p.includes(b) ? p.filter((x) => x !== b) : [...p, b]));
 
-  const countryBanks = BANKS_BY_COUNTRY[country] || [];
-
-  const finish = async (withBanks) => {
+  const finish = async (mode) => {
+    // mode: "connect" | "manual" | "sample"
     setLoading(true);
+    const useDemo = mode === "sample";
     try {
       await api.post("/onboarding", {
-        primary_goal: goal, help_with: help, use_demo: true,
-        name: name.trim(), country, banks: withBanks,
+        primary_goal: goal, help_with: help, use_demo: useDemo,
+        name: name.trim(), country, banks: [],
       });
-      setUser({ ...user, onboarded: true, name: name.trim(), country, banks: withBanks });
-      navigate("/app");
+      setUser({ ...user, onboarded: true, name: name.trim(), country, demo_mode: useDemo });
+      navigate(mode === "sample" ? "/app" : "/app/money");
     } catch {
       toast.error("Couldn't finish setup. Try again.");
     } finally {
@@ -156,41 +148,46 @@ export default function Onboarding() {
         ))}
       </div>
     </div>,
-    // Step 4: banks + connect
+    // Step 4: how to start
     <div key="s4">
-      <h1 className="font-head text-3xl font-extrabold">Connect your banks</h1>
-      <p className="text-slate-400 mt-2 mb-5">Pick the banks you use in {country || "your country"}. We'll set up matching demo accounts.</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[38vh] overflow-y-auto pr-1 mb-5">
-        {countryBanks.map((b) => (
-          <button
-            key={b}
-            onClick={() => toggleBank(b)}
-            data-testid={`bank-${b.toLowerCase().replace(/ /g, "-")}`}
-            className={`wc-card p-3.5 flex items-center gap-2.5 text-left transition-all ${
-              banks.includes(b) ? "border-amber-500/60 bg-amber-500/10" : "wc-card-hover"
-            }`}
-          >
-            <Building2 size={18} className={banks.includes(b) ? "text-amber-400" : "text-slate-400"} />
-            <span className="text-sm font-medium truncate">{b}</span>
-          </button>
-        ))}
-      </div>
+      <h1 className="font-head text-3xl font-extrabold">How do you want to start?</h1>
+      <p className="text-slate-400 mt-2 mb-5">Your dashboard uses only your real data. Nothing is simulated unless you choose sample data.</p>
       <div className="space-y-3">
-        <Button
-          onClick={() => finish(banks)}
-          disabled={loading || banks.length === 0}
-          data-testid="connect-accounts-btn"
-          className="w-full h-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold"
-        >
-          {loading ? "Setting up…" : banks.length ? `Connect ${banks.length} bank${banks.length > 1 ? "s" : ""}` : "Select a bank"}
-        </Button>
         <button
-          onClick={() => finish([])}
+          onClick={() => finish("connect")}
           disabled={loading}
-          data-testid="use-demo-btn"
-          className="w-full flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-white py-2"
+          data-testid="start-connect-btn"
+          className="w-full wc-card wc-card-hover p-5 flex items-center gap-4 text-left border-amber-500/30"
         >
-          <Database size={15} /> Skip — just use demo data
+          <div className="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-400 grid place-items-center shrink-0"><Landmark size={22} /></div>
+          <div className="flex-1">
+            <div className="font-semibold">Connect a bank</div>
+            <div className="text-sm text-slate-400">Securely link your real accounts via Plaid. We never see your login.</div>
+          </div>
+        </button>
+        <button
+          onClick={() => finish("manual")}
+          disabled={loading}
+          data-testid="start-manual-btn"
+          className="w-full wc-card wc-card-hover p-5 flex items-center gap-4 text-left"
+        >
+          <div className="w-11 h-11 rounded-xl bg-white/5 text-slate-300 grid place-items-center shrink-0"><User size={22} /></div>
+          <div className="flex-1">
+            <div className="font-semibold">Add accounts manually</div>
+            <div className="text-sm text-slate-400">Enter balances and transactions yourself — no bank needed.</div>
+          </div>
+        </button>
+        <button
+          onClick={() => finish("sample")}
+          disabled={loading}
+          data-testid="start-sample-btn"
+          className="w-full wc-card wc-card-hover p-5 flex items-center gap-4 text-left"
+        >
+          <div className="w-11 h-11 rounded-xl bg-white/5 text-slate-300 grid place-items-center shrink-0"><Database size={22} /></div>
+          <div className="flex-1">
+            <div className="font-semibold flex items-center gap-2">Explore with sample data <span className="text-[10px] uppercase tracking-wide bg-white/10 text-slate-300 rounded-full px-2 py-0.5">Demo</span></div>
+            <div className="text-sm text-slate-400">Try the app with realistic example data you can clear anytime.</div>
+          </div>
         </button>
       </div>
       <div className="mt-6">

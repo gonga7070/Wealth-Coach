@@ -144,3 +144,28 @@ def reset_email_html(name: str, reset_link: str) -> str:
         'you for your password or bank login by email.</p>'
         '</td></tr></table></td></tr></table>'
     )
+
+
+def verification_email_html(name: str, verify_link: str) -> str:
+    from html import escape
+    safe_name = escape(name or "there")
+    safe_link = escape(verify_link)
+    return (
+        '<table role="presentation" width="100%" style="background:#0b0d10;padding:32px 0">'
+        '<tr><td align="center">'
+        '<table role="presentation" width="480" style="background:#14171c;border-radius:16px;'
+        'font-family:Arial,Helvetica,sans-serif;color:#e8eaed">'
+        '<tr><td style="padding:32px">'
+        '<p style="font-size:20px;font-weight:bold;margin:0 0 8px;color:#f5b301">Wealth Coach</p>'
+        f'<p style="font-size:15px;line-height:1.6;margin:0 0 16px">Hi {safe_name}, welcome to Wealth Coach!</p>'
+        '<p style="font-size:15px;line-height:1.6;margin:0 0 24px">Please confirm your email address so we '
+        'can keep your account secure. This link expires in 24 hours.</p>'
+        f'<a href="{safe_link}" style="display:inline-block;background:#f5b301;color:#0b0d10;'
+        'text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;font-size:15px">'
+        'Verify my email</a>'
+        '<p style="font-size:13px;line-height:1.6;color:#9aa0a6;margin:24px 0 0">If you didn\'t create a '
+        'Wealth Coach account, you can safely ignore this email.</p>'
+        '<p style="font-size:12px;color:#6b7280;margin:20px 0 0">Sent by Wealth Coach. We will never ask you '
+        'for your password or bank login by email.</p>'
+        '</td></tr></table></td></tr></table>'
+    )

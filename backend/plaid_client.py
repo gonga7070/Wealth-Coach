@@ -75,7 +75,7 @@ def map_account_type(plaid_type: str, subtype) -> str:
     return "checking"
 
 
-def map_accounts(plaid_accounts: list, institution: str, user_id: str) -> list:
+def map_accounts(plaid_accounts: list, institution: str, user_id: str, item_id: str = None, logo: str = None) -> list:
     out = []
     for a in plaid_accounts:
         bal = a.get("balances", {})
@@ -86,11 +86,15 @@ def map_accounts(plaid_accounts: list, institution: str, user_id: str) -> list:
         out.append({
             "user_id": user_id,
             "plaid_account_id": a.get("account_id"),
+            "plaid_item_id": item_id,
             "name": a.get("name") or a.get("official_name") or "Account",
             "type": acct_type,
             "institution": institution,
+            "institution_logo": logo,
             "mask": a.get("mask") or "0000",
             "balance": round(float(signed), 2),
+            "currency": bal.get("iso_currency_code") or "USD",
+            "source": "bank",
         })
     return out
 
@@ -111,12 +115,14 @@ def map_transactions(plaid_txns: list, acct_id_map: dict, user_id: str) -> list:
         out.append({
             "user_id": user_id,
             "account_id": our_acct,
+            "plaid_txn_id": t.get("transaction_id"),
             "merchant": t.get("merchant_name") or t.get("name") or "Transaction",
             "amount": round(amount, 2),
             "category": category,
             "date": (t.get("date") or datetime.now(timezone.utc).date().isoformat()) + "T00:00:00+00:00",
             "pending": bool(t.get("pending")),
             "note": "",
+            "source": "bank",
         })
     return out
 

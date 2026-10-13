@@ -7,6 +7,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import api from "@/lib/api";
+import VerifyBanner from "@/components/VerifyBanner";
 
 function OwlFace({ size = 20 }) {
   return (
@@ -175,6 +176,7 @@ export default function Layout() {
         </header>
 
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-10 max-w-6xl w-full mx-auto">
+          <VerifyBanner />
           <Outlet />
         </main>
       </div>

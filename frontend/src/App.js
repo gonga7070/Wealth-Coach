@@ -8,6 +8,7 @@ import Welcome from "@/pages/Welcome";
 import Auth from "@/pages/Auth";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import VerifyEmail from "@/pages/VerifyEmail";
 import Onboarding from "@/pages/Onboarding";
 import Home from "@/pages/Home";
 import Money from "@/pages/Money";
@@ -22,7 +23,7 @@ import Savings from "@/pages/Savings";
 import Investing from "@/pages/Investing";
 import Coach from "@/pages/Coach";
 import Notifications from "@/pages/Notifications";
-import Profile from "@/pages/Profile";
+import Profile from "@/pages/Settings";
 import Premium from "@/pages/Premium";
 
 function Loader() {
@@ -57,6 +58,7 @@ function Routing() {
       <Route path="/register" element={<PublicOnly><Auth mode="register" /></PublicOnly>} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/app" element={<Protected><Layout /></Protected>}>
         <Route index element={<Home />} />

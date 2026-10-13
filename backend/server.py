@@ -155,6 +155,61 @@ class ChatReq(BaseModel):
     message: str
 
 
+class ChangePasswordReq(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class VerifyEmailReq(BaseModel):
+    token: str
+
+
+class ManualAccountReq(BaseModel):
+    name: str
+    type: str = "checking"
+    institution: Optional[str] = None
+    balance: float = 0
+    currency: str = "USD"
+
+
+class ManualAccountUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    institution: Optional[str] = None
+    balance: Optional[float] = None
+    currency: Optional[str] = None
+
+
+class ManualTxnReq(BaseModel):
+    account_id: str
+    merchant: str
+    amount: float
+    category: str = "Shopping"
+    date: Optional[str] = None
+    note: Optional[str] = None
+
+
+class PreferencesReq(BaseModel):
+    name: Optional[str] = None
+    country: Optional[str] = None
+    display_currency: Optional[str] = None
+    date_format: Optional[str] = None
+    timezone: Optional[str] = None
+    notifications: Optional[dict] = None
+
+
+class DisconnectReq(BaseModel):
+    item_id: Optional[str] = None
+
+
+DEFAULT_PREFS = {
+    "display_currency": "USD",
+    "date_format": "MMM D, YYYY",
+    "timezone": "America/Toronto",
+    "notifications": {"spending_alerts": True, "budget_alerts": True, "savings_reminders": True},
+}
+
+
 # ---------------- Seeding ----------------
 async def seed_user_data(user_id: str, primary_goal: str, banks=None):
     await db.accounts.delete_many({"user_id": user_id})
@@ -324,17 +379,52 @@ async def build_insights(user_id: str, overview: dict):
 
 
 # ---------------- Auth routes ----------------
+def _hash_reset_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _origin_from_request(request: Request) -> str:
+    origin = (request.headers.get("origin") or "").rstrip("/")
+    if not origin:
+        ref = request.headers.get("referer", "")
+        if ref:
+            p = urlparse(ref)
+            origin = f"{p.scheme}://{p.netloc}"
+    return origin
+
+
+async def _send_verification(uid: str, email: str, name: str, origin: str):
+    raw = secrets.token_urlsafe(32)
+    await db.email_verification_tokens.insert_one({
+        "user_id": uid, "token_hash": _hash_reset_token(raw),
+        "expires_at": datetime.now(timezone.utc) + timedelta(hours=24),
+        "used": False, "created_at": datetime.now(timezone.utc),
+    })
+    link = f"{origin}/verify-email?token={raw}" if origin else ""
+    if not link:
+        return
+    try:
+        await email_service.send_email(
+            to=email, subject="Verify your Wealth Coach email",
+            html=email_service.verification_email_html(name, link))
+    except Exception as e:
+        logger.error(f"Verification email failed: {e}")
+
+
 @api.post("/auth/register")
-async def register(req: RegisterReq):
+async def register(req: RegisterReq, request: Request):
     email = req.email.lower()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="An account with this email already exists")
     doc = {"name": req.name, "email": email, "password_hash": hash_password(req.password),
-           "onboarded": False, "plus": False, "created_at": datetime.now(timezone.utc).isoformat()}
+           "onboarded": False, "plus": False, "email_verified": False, "demo_mode": False,
+           "preferences": dict(DEFAULT_PREFS), "created_at": datetime.now(timezone.utc).isoformat()}
     res = await db.users.insert_one(doc)
     uid = str(res.inserted_id)
+    await _send_verification(uid, email, req.name, _origin_from_request(request))
     token = create_access_token(uid, email)
-    return {"token": token, "user": {"id": uid, "name": req.name, "email": email, "onboarded": False, "plus": False}}
+    return {"token": token, "user": {"id": uid, "name": req.name, "email": email,
+            "onboarded": False, "plus": False, "email_verified": False}}
 
 
 @api.post("/auth/login")
@@ -353,11 +443,10 @@ async def login(req: LoginReq):
 async def me(user: dict = Depends(get_current_user)):
     return {"id": user["id"], "name": user["name"], "email": user["email"],
             "onboarded": user.get("onboarded", False), "plus": user.get("plus", False),
-            "country": user.get("country"), "banks": user.get("banks", [])}
-
-
-def _hash_reset_token(token: str) -> str:
-    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+            "country": user.get("country"), "banks": user.get("banks", []),
+            "email_verified": user.get("email_verified", False),
+            "demo_mode": user.get("demo_mode", False),
+            "preferences": {**DEFAULT_PREFS, **(user.get("preferences") or {})}}
 
 
 @api.post("/auth/forgot-password")
@@ -415,13 +504,16 @@ async def reset_password(req: ResetPasswordReq):
 
 @api.post("/onboarding")
 async def onboarding(req: OnboardingReq, user: dict = Depends(get_current_user)):
+    cur = "CAD" if (req.country or "").strip().lower() == "canada" else "USD"
+    prefs = {**DEFAULT_PREFS, **(user.get("preferences") or {}), "display_currency": cur}
     updates = {"onboarded": True, "primary_goal": req.primary_goal, "help_with": req.help_with,
-               "country": req.country, "banks": req.banks}
+               "country": req.country, "demo_mode": bool(req.use_demo), "preferences": prefs}
     if req.name:
         updates["name"] = req.name
     await db.users.update_one({"_id": oid(user["id"])}, {"$set": updates})
-    await seed_user_data(user["id"], req.primary_goal, req.banks)
-    return {"ok": True}
+    if req.use_demo:
+        await seed_user_data(user["id"], req.primary_goal, req.banks)
+    return {"ok": True, "demo_mode": bool(req.use_demo)}
 
 
 # ---------------- Dashboard ----------------
@@ -458,7 +550,14 @@ async def dashboard(user: dict = Depends(get_current_user)):
 @api.get("/accounts")
 async def get_accounts(user: dict = Depends(get_current_user)):
     accounts = [clean(a) for a in await db.accounts.find({"user_id": user["id"]}).to_list(100)]
-    return {"accounts": accounts, "net_worth": round(sum(a["balance"] for a in accounts), 2)}
+    by_currency = {}
+    for a in accounts:
+        cur = a.get("currency") or "USD"
+        by_currency[cur] = round(by_currency.get(cur, 0) + a["balance"], 2)
+    item = await db.plaid_items.find_one({"user_id": user["id"]}, sort=[("last_sync", -1)])
+    last_updated = item.get("last_sync") if item else None
+    return {"accounts": accounts, "net_worth": round(sum(a["balance"] for a in accounts), 2),
+            "by_currency": by_currency, "last_updated": last_updated}
 
 
 @api.get("/accounts/{account_id}")
@@ -846,11 +945,15 @@ async def plaid_exchange(req: PlaidExchangeReq, user: dict = Depends(get_current
         item = await plaid.plaid_request("/item/get", {"access_token": access_token})
         inst_name = "Your Bank"
         inst_id = (item.get("item") or {}).get("institution_id")
+        logo = None
         if inst_id:
             try:
                 inst = await plaid.plaid_request("/institutions/get_by_id", {
-                    "institution_id": inst_id, "country_codes": ["US", "CA"]})
-                inst_name = (inst.get("institution") or {}).get("name", inst_name)
+                    "institution_id": inst_id, "country_codes": ["US", "CA"],
+                    "options": {"include_optional_metadata": True}})
+                institution = inst.get("institution") or {}
+                inst_name = institution.get("name", inst_name)
+                logo = institution.get("logo")
             except plaid.PlaidError:
                 pass
 
@@ -873,42 +976,290 @@ async def plaid_exchange(req: PlaidExchangeReq, user: dict = Depends(get_current
     except plaid.PlaidError as e:
         raise HTTPException(status_code=502, detail=e.message)
 
-    # store encrypted item
+    # store encrypted item (append — supports multiple institutions per user)
     await db.plaid_items.update_one(
         {"user_id": user["id"], "item_id": item_id},
         {"$set": {"user_id": user["id"], "item_id": item_id,
                   "access_token": plaid.encrypt_token(access_token),
-                  "institution": inst_name,
+                  "institution": inst_name, "institution_id": inst_id, "logo": logo,
+                  "cursor": cursor,
+                  "last_sync": datetime.now(timezone.utc).isoformat(),
                   "updated_at": datetime.now(timezone.utc).isoformat()}},
         upsert=True,
     )
 
-    # import accounts into our schema (replace demo data on first real connect)
-    await db.accounts.delete_many({"user_id": user["id"]})
-    await db.transactions.delete_many({"user_id": user["id"]})
-    mapped = plaid.map_accounts(plaid_accounts, inst_name, user["id"])
+    # On the first REAL connection, clear any sample/demo data so real data stands alone.
+    u = await db.users.find_one({"_id": oid(user["id"])})
+    if u.get("demo_mode"):
+        for coll in ("accounts", "transactions", "goals", "budget", "recurring", "notifications"):
+            await db[coll].delete_many({"user_id": user["id"]})
+        await db.users.update_one({"_id": oid(user["id"])}, {"$set": {"demo_mode": False}})
+
+    # Replace this item's previously imported data (idempotent re-link)
+    await db.accounts.delete_many({"user_id": user["id"], "plaid_item_id": item_id})
+    await db.transactions.delete_many({"user_id": user["id"], "plaid_item_id": item_id})
+    mapped = plaid.map_accounts(plaid_accounts, inst_name, user["id"], item_id=item_id, logo=logo)
     id_map = {}
     for m in mapped:
         pid = m.pop("plaid_account_id")
         res = await db.accounts.insert_one(m)
         id_map[pid] = str(res.inserted_id)
     txns = plaid.map_transactions(added, id_map, user["id"])
+    for t in txns:
+        t["plaid_item_id"] = item_id
     if txns:
         await db.transactions.insert_many(txns)
 
-    await db.users.update_one({"_id": oid(user["id"])}, {"$set": {"banks": [inst_name]}})
+    banks = sorted({pi["institution"] for pi in await db.plaid_items.find({"user_id": user["id"]}).to_list(100)})
+    await db.users.update_one({"_id": oid(user["id"])}, {"$set": {"banks": banks}})
     return {"ok": True, "institution": inst_name, "accounts": len(mapped), "transactions": len(txns)}
 
 
 @api.post("/plaid/disconnect")
-async def plaid_disconnect(user: dict = Depends(get_current_user)):
-    item = await db.plaid_items.find_one({"user_id": user["id"]})
-    if item and plaid.PLAID_ENABLED:
+async def plaid_disconnect(user: dict = Depends(get_current_user), req: DisconnectReq = DisconnectReq()):
+    q = {"user_id": user["id"]}
+    if req and req.item_id:
+        q["item_id"] = req.item_id
+    items = await db.plaid_items.find(q).to_list(100)
+    for item in items:
+        if plaid.PLAID_ENABLED:
+            try:
+                await plaid.plaid_request("/item/remove", {"access_token": plaid.decrypt_token(item["access_token"])})
+            except plaid.PlaidError:
+                pass
+        await db.accounts.delete_many({"user_id": user["id"], "plaid_item_id": item["item_id"]})
+        await db.transactions.delete_many({"user_id": user["id"], "plaid_item_id": item["item_id"]})
+    await db.plaid_items.delete_many(q)
+    banks = sorted({pi["institution"] for pi in await db.plaid_items.find({"user_id": user["id"]}).to_list(100)})
+    await db.users.update_one({"_id": oid(user["id"])}, {"$set": {"banks": banks}})
+    return {"ok": True}
+
+
+# ---------------- Email verification ----------------
+@api.post("/auth/send-verification")
+async def send_verification(request: Request, user: dict = Depends(get_current_user)):
+    u = await db.users.find_one({"_id": oid(user["id"])})
+    if u.get("email_verified"):
+        return {"ok": True, "already_verified": True}
+    await _send_verification(user["id"], u["email"], u.get("name", ""), _origin_from_request(request))
+    return {"ok": True}
+
+
+@api.post("/auth/verify-email")
+async def verify_email(req: VerifyEmailReq):
+    rec = await db.email_verification_tokens.find_one({"token_hash": _hash_reset_token(req.token), "used": False})
+    if not rec:
+        raise HTTPException(status_code=400, detail="This verification link is invalid or already used")
+    exp = rec["expires_at"]
+    if exp.tzinfo is None:
+        exp = exp.replace(tzinfo=timezone.utc)
+    if exp < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="This verification link has expired. Please request a new one")
+    await db.users.update_one({"_id": oid(rec["user_id"])}, {"$set": {"email_verified": True}})
+    await db.email_verification_tokens.update_one({"_id": rec["_id"]}, {"$set": {"used": True}})
+    return {"ok": True, "message": "Your email is verified."}
+
+
+@api.post("/auth/change-password")
+async def change_password(req: ChangePasswordReq, user: dict = Depends(get_current_user)):
+    u = await db.users.find_one({"_id": oid(user["id"])})
+    if not verify_password(req.current_password, u["password_hash"]):
+        raise HTTPException(status_code=400, detail="Your current password is incorrect")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+    await db.users.update_one({"_id": oid(user["id"])}, {"$set": {"password_hash": hash_password(req.new_password)}})
+    return {"ok": True, "message": "Password updated"}
+
+
+# ---------------- Manual accounts & transactions ----------------
+@api.post("/accounts")
+async def create_manual_account(req: ManualAccountReq, user: dict = Depends(get_current_user)):
+    doc = {"user_id": user["id"], "name": req.name, "type": req.type,
+           "institution": req.institution or "Manual entry", "mask": "0000",
+           "balance": round(req.balance, 2), "currency": req.currency, "source": "manual",
+           "created_at": datetime.now(timezone.utc).isoformat()}
+    res = await db.accounts.insert_one(doc)
+    return {"ok": True, "id": str(res.inserted_id)}
+
+
+@api.patch("/accounts/{account_id}")
+async def update_manual_account(account_id: str, req: ManualAccountUpdate, user: dict = Depends(get_current_user)):
+    acct = await db.accounts.find_one({"_id": oid(account_id), "user_id": user["id"]})
+    if not acct:
+        raise HTTPException(status_code=404, detail="Account not found")
+    if acct.get("source") != "manual":
+        raise HTTPException(status_code=400, detail="Bank-connected accounts can't be edited manually")
+    upd = {k: v for k, v in req.dict().items() if v is not None}
+    if "balance" in upd:
+        upd["balance"] = round(upd["balance"], 2)
+    await db.accounts.update_one({"_id": oid(account_id)}, {"$set": upd})
+    return {"ok": True}
+
+
+@api.delete("/accounts/{account_id}")
+async def delete_manual_account(account_id: str, user: dict = Depends(get_current_user)):
+    acct = await db.accounts.find_one({"_id": oid(account_id), "user_id": user["id"]})
+    if not acct:
+        raise HTTPException(status_code=404, detail="Account not found")
+    if acct.get("source") != "manual":
+        raise HTTPException(status_code=400, detail="Disconnect the bank to remove this account")
+    await db.accounts.delete_one({"_id": oid(account_id)})
+    await db.transactions.delete_many({"user_id": user["id"], "account_id": account_id})
+    return {"ok": True}
+
+
+@api.post("/transactions")
+async def create_manual_txn(req: ManualTxnReq, user: dict = Depends(get_current_user)):
+    acct = await db.accounts.find_one({"_id": oid(req.account_id), "user_id": user["id"]})
+    if not acct:
+        raise HTTPException(status_code=404, detail="Account not found")
+    doc = {"user_id": user["id"], "account_id": req.account_id, "merchant": req.merchant,
+           "amount": round(req.amount, 2), "category": req.category,
+           "date": req.date or datetime.now(timezone.utc).isoformat(),
+           "pending": False, "note": req.note or "", "source": "manual"}
+    res = await db.transactions.insert_one(doc)
+    return {"ok": True, "id": str(res.inserted_id)}
+
+
+@api.delete("/transactions/{txn_id}")
+async def delete_manual_txn(txn_id: str, user: dict = Depends(get_current_user)):
+    t = await db.transactions.find_one({"_id": oid(txn_id), "user_id": user["id"]})
+    if not t:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    if t.get("source") != "manual":
+        raise HTTPException(status_code=400, detail="Bank transactions can't be deleted")
+    await db.transactions.delete_one({"_id": oid(txn_id)})
+    return {"ok": True}
+
+
+# ---------------- Plaid: items, refresh, reconnect ----------------
+@api.get("/plaid/items")
+async def plaid_items(user: dict = Depends(get_current_user)):
+    items = await db.plaid_items.find({"user_id": user["id"]}).to_list(100)
+    out = []
+    for it in items:
+        cnt = await db.accounts.count_documents({"user_id": user["id"], "plaid_item_id": it["item_id"]})
+        out.append({"item_id": it["item_id"], "institution": it.get("institution"),
+                    "logo": it.get("logo"), "last_sync": it.get("last_sync"), "accounts": cnt})
+    return {"items": out, "enabled": plaid.PLAID_ENABLED, "env": plaid.PLAID_ENV}
+
+
+@api.post("/plaid/refresh")
+async def plaid_refresh(user: dict = Depends(get_current_user)):
+    items = await db.plaid_items.find({"user_id": user["id"]}).to_list(100)
+    if not items:
+        raise HTTPException(status_code=400, detail="No connected banks to refresh")
+    new_total = 0
+    for item in items:
+        at = plaid.decrypt_token(item["access_token"])
         try:
-            await plaid.plaid_request("/item/remove", {"access_token": plaid.decrypt_token(item["access_token"])})
+            acc = await plaid.plaid_request("/accounts/get", {"access_token": at})
         except plaid.PlaidError:
-            pass
-    await db.plaid_items.delete_many({"user_id": user["id"]})
+            continue
+        our = await db.accounts.find({"user_id": user["id"], "plaid_item_id": item["item_id"]}).to_list(100)
+        pid_to_id = {a.get("plaid_account_id"): str(a["_id"]) for a in our}
+        for pa in acc.get("accounts", []):
+            oid_str = pid_to_id.get(pa.get("account_id"))
+            if oid_str:
+                bal = pa.get("balances", {})
+                cur = bal.get("current") or 0
+                a_type = plaid.map_account_type(pa.get("type"), pa.get("subtype"))
+                signed = -abs(cur) if a_type in ("credit", "loan") else cur
+                await db.accounts.update_one({"_id": oid(oid_str)}, {"$set": {"balance": round(float(signed), 2)}})
+        cursor = item.get("cursor", "") or ""
+        added, removed = [], []
+        for _ in range(10):
+            page = await plaid.plaid_request("/transactions/sync", {"access_token": at, "cursor": cursor, "count": 500})
+            added += page.get("added", [])
+            removed += page.get("removed", [])
+            cursor = page.get("next_cursor", cursor)
+            if not page.get("has_more"):
+                break
+        new_txns = plaid.map_transactions(added, pid_to_id, user["id"])
+        for t in new_txns:
+            t["plaid_item_id"] = item["item_id"]
+        if new_txns:
+            await db.transactions.insert_many(new_txns)
+            new_total += len(new_txns)
+        for r in removed:
+            await db.transactions.delete_many({"user_id": user["id"], "plaid_txn_id": r.get("transaction_id")})
+        await db.plaid_items.update_one({"_id": item["_id"]},
+                                        {"$set": {"cursor": cursor, "last_sync": datetime.now(timezone.utc).isoformat()}})
+    return {"ok": True, "new_transactions": new_total}
+
+
+@api.post("/plaid/reconnect")
+async def plaid_reconnect(req: DisconnectReq, user: dict = Depends(get_current_user)):
+    item = await db.plaid_items.find_one({"user_id": user["id"], "item_id": req.item_id})
+    if not item:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    try:
+        data = await plaid.plaid_request("/link/token/create", {
+            "client_name": "Wealth Coach", "user": {"client_user_id": user["id"]},
+            "country_codes": ["US", "CA"], "language": "en",
+            "access_token": plaid.decrypt_token(item["access_token"])})
+    except plaid.PlaidError as e:
+        raise HTTPException(status_code=502, detail=e.message)
+    return {"link_token": data["link_token"]}
+
+
+# ---------------- Preferences, export, deletion ----------------
+@api.get("/profile/preferences")
+async def get_preferences(user: dict = Depends(get_current_user)):
+    u = await db.users.find_one({"_id": oid(user["id"])})
+    return {"preferences": {**DEFAULT_PREFS, **(u.get("preferences") or {})},
+            "name": u.get("name"), "email": u.get("email"), "country": u.get("country")}
+
+
+@api.put("/profile/preferences")
+async def put_preferences(req: PreferencesReq, user: dict = Depends(get_current_user)):
+    u = await db.users.find_one({"_id": oid(user["id"])})
+    prefs = {**DEFAULT_PREFS, **(u.get("preferences") or {})}
+    updates = {}
+    if req.name is not None:
+        updates["name"] = req.name
+    if req.country is not None:
+        updates["country"] = req.country
+    for k in ("display_currency", "date_format", "timezone"):
+        v = getattr(req, k)
+        if v is not None:
+            prefs[k] = v
+    if req.notifications is not None:
+        prefs["notifications"] = {**prefs.get("notifications", {}), **req.notifications}
+    updates["preferences"] = prefs
+    await db.users.update_one({"_id": oid(user["id"])}, {"$set": updates})
+    return {"ok": True, "preferences": prefs}
+
+
+@api.get("/profile/export")
+async def export_data(user: dict = Depends(get_current_user)):
+    u = await db.users.find_one({"_id": oid(user["id"])})
+    out = {"exported_at": datetime.now(timezone.utc).isoformat(),
+           "profile": {"name": u.get("name"), "email": u.get("email"), "country": u.get("country"),
+                       "preferences": u.get("preferences"), "created_at": u.get("created_at")}}
+    for coll in ("accounts", "transactions", "goals", "budget", "recurring", "notifications"):
+        docs = [clean(d) for d in await db[coll].find({"user_id": user["id"]}).to_list(5000)]
+        for d in docs:
+            d.pop("plaid_account_id", None)
+            d.pop("plaid_item_id", None)
+            d.pop("plaid_txn_id", None)
+        out[coll] = docs
+    out["connected_banks"] = [pi.get("institution") for pi in await db.plaid_items.find({"user_id": user["id"]}).to_list(100)]
+    return out
+
+
+@api.delete("/profile")
+async def delete_account_endpoint(user: dict = Depends(get_current_user)):
+    for item in await db.plaid_items.find({"user_id": user["id"]}).to_list(100):
+        if plaid.PLAID_ENABLED:
+            try:
+                await plaid.plaid_request("/item/remove", {"access_token": plaid.decrypt_token(item["access_token"])})
+            except plaid.PlaidError:
+                pass
+    for coll in ("accounts", "transactions", "goals", "budget", "recurring", "notifications",
+                 "coach_messages", "plaid_items", "password_reset_tokens", "email_verification_tokens"):
+        await db[coll].delete_many({"user_id": user["id"]})
+    await db.users.delete_one({"_id": oid(user["id"])})
     return {"ok": True}
 
 
@@ -927,6 +1278,7 @@ app.add_middleware(
 async def startup():
     await db.users.create_index("email", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
+    await db.email_verification_tokens.create_index("expires_at", expireAfterSeconds=0)
 
 
 @app.on_event("shutdown")
