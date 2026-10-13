@@ -2,11 +2,37 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Wallet, PieChart, Brain, Target, Sliders, RefreshCw,
-  PiggyBank, TrendingUp, MessageSquare, Bell, User, Crown, LogOut, Menu, Sparkles, Bird,
+  PiggyBank, TrendingUp, MessageSquare, Bell, User, Crown, LogOut, Menu, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import api from "@/lib/api";
+
+function OwlFace({ size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {/* head */}
+      <path d="M4 11a8 8 0 0 1 16 0c0 4.5-3.5 8-8 8s-8-3.5-8-8Z" />
+      {/* ear tufts */}
+      <path d="M5.5 6 4 3.5M18.5 6 20 3.5" />
+      {/* eyes */}
+      <circle cx="9" cy="10.5" r="2.2" />
+      <circle cx="15" cy="10.5" r="2.2" />
+      {/* beak */}
+      <path d="M12 12.5v2l-1 1" />
+    </svg>
+  );
+}
 
 const NAV = [
   { to: "/app", label: "Home", icon: LayoutDashboard, end: true },
@@ -167,7 +193,7 @@ export default function Layout() {
             }`
           }
         >
-          <Bird size={20} />
+          <OwlFace size={20} />
           Coach
         </NavLink>
         {BOTTOM.slice(2).map((item) => (
