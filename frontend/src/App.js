@@ -6,6 +6,8 @@ import { Toaster } from "@/components/ui/sonner";
 import Layout from "@/components/Layout";
 import Welcome from "@/pages/Welcome";
 import Auth from "@/pages/Auth";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import Onboarding from "@/pages/Onboarding";
 import Home from "@/pages/Home";
 import Money from "@/pages/Money";
@@ -53,6 +55,8 @@ function Routing() {
       <Route path="/" element={<Welcome />} />
       <Route path="/login" element={<PublicOnly><Auth mode="login" /></PublicOnly>} />
       <Route path="/register" element={<PublicOnly><Auth mode="register" /></PublicOnly>} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/app" element={<Protected><Layout /></Protected>}>
         <Route index element={<Home />} />

@@ -16,10 +16,14 @@ import asyncio
 import bcrypt
 import jwt
 import logging
+import secrets
+import hashlib
+from urllib.parse import urlparse
 
 import seed as seed_mod
 import coach as coach_mod
 import plaid_client as plaid
+import email_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wealthcoach")
@@ -95,6 +99,15 @@ class RegisterReq(BaseModel):
 
 class LoginReq(BaseModel):
     email: EmailStr
+    password: str
+
+
+class ForgotPasswordReq(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordReq(BaseModel):
+    token: str
     password: str
 
 
@@ -341,6 +354,63 @@ async def me(user: dict = Depends(get_current_user)):
     return {"id": user["id"], "name": user["name"], "email": user["email"],
             "onboarded": user.get("onboarded", False), "plus": user.get("plus", False),
             "country": user.get("country"), "banks": user.get("banks", [])}
+
+
+def _hash_reset_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+@api.post("/auth/forgot-password")
+async def forgot_password(req: ForgotPasswordReq, request: Request):
+    email = req.email.lower()
+    user = await db.users.find_one({"email": email})
+    # Always respond the same way so we never reveal whether an account exists.
+    if user:
+        raw = secrets.token_urlsafe(32)
+        await db.password_reset_tokens.insert_one({
+            "user_id": str(user["_id"]),
+            "token_hash": _hash_reset_token(raw),
+            "expires_at": datetime.now(timezone.utc) + timedelta(hours=1),
+            "used": False,
+            "created_at": datetime.now(timezone.utc),
+        })
+        origin = (request.headers.get("origin") or "").rstrip("/")
+        if not origin:
+            ref = request.headers.get("referer", "")
+            if ref:
+                p = urlparse(ref)
+                origin = f"{p.scheme}://{p.netloc}"
+        reset_link = f"{origin}/reset-password?token={raw}"
+        try:
+            await email_service.send_email(
+                to=email,
+                subject="Reset your Wealth Coach password",
+                html=email_service.reset_email_html(user.get("name", ""), reset_link),
+            )
+        except Exception as e:
+            logger.error(f"Failed to send reset email: {e}")
+    return {"ok": True, "message": "If an account exists for that email, a reset link is on its way."}
+
+
+@api.post("/auth/reset-password")
+async def reset_password(req: ResetPasswordReq):
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    rec = await db.password_reset_tokens.find_one({
+        "token_hash": _hash_reset_token(req.token),
+        "used": False,
+    })
+    if not rec:
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has already been used")
+    expires = rec["expires_at"]
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    if expires < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="This reset link has expired. Please request a new one")
+    await db.users.update_one({"_id": oid(rec["user_id"])},
+                              {"$set": {"password_hash": hash_password(req.password)}})
+    await db.password_reset_tokens.update_one({"_id": rec["_id"]}, {"$set": {"used": True}})
+    return {"ok": True, "message": "Your password has been reset. You can now log in."}
 
 
 @api.post("/onboarding")
@@ -856,6 +926,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
+    await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
 
 
 @app.on_event("shutdown")

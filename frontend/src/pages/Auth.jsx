@@ -16,10 +16,23 @@ export default function Auth({ mode }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
+    setError("");
+    if (!isLogin) {
+      if (password.length < 6) {
+        setError("Password must be at least 6 characters.");
+        return;
+      }
+      if (password !== confirm) {
+        setError("Passwords don't match.");
+        return;
+      }
+    }
     setLoading(true);
     try {
       const user = isLogin
@@ -27,7 +40,7 @@ export default function Auth({ mode }) {
         : await register(name, email, password);
       navigate(user.onboarded ? "/app" : "/onboarding");
     } catch (err) {
-      toast.error(apiErr(err.response?.data?.detail) || "Something went wrong");
+      setError(apiErr(err.response?.data?.detail) || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -114,6 +127,40 @@ export default function Auth({ mode }) {
                 className="mt-1.5 h-11 bg-white/5 border-white/12 rounded-xl"
               />
             </div>
+            {!isLogin && (
+              <div>
+                <Label className="text-slate-300 text-sm">Confirm password</Label>
+                <Input
+                  type="password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  required
+                  minLength={6}
+                  data-testid="confirm-password-input"
+                  placeholder="••••••••"
+                  className="mt-1.5 h-11 bg-white/5 border-white/12 rounded-xl"
+                />
+              </div>
+            )}
+            {isLogin && (
+              <div className="text-right -mt-1">
+                <Link
+                  to="/forgot-password"
+                  data-testid="forgot-password-link"
+                  className="text-xs text-amber-400 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+            {error && (
+              <div
+                data-testid="auth-error"
+                className="rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 text-sm px-3.5 py-2.5"
+              >
+                {error}
+              </div>
+            )}
             <Button
               type="submit"
               disabled={loading}
