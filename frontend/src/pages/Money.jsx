@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { fmt } from "@/lib/format";
+import PlaidConnect from "@/components/PlaidConnect";
 import { ChevronRight, Wallet, PiggyBank, CreditCard, LineChart, Landmark } from "lucide-react";
 
 const TYPE_META = {
@@ -17,9 +18,10 @@ export default function Money() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     api.get("/accounts").then((r) => setData(r.data)).catch(() => {});
   }, []);
+  useEffect(() => { load(); }, [load]);
 
   if (!data) return <div className="text-slate-500 animate-pulse">Loading accounts…</div>;
 
@@ -34,6 +36,8 @@ export default function Money() {
         <h1 className="font-head text-2xl sm:text-3xl font-extrabold">Your money</h1>
         <p className="text-slate-400 mt-1">Everything you own and owe, in one place.</p>
       </div>
+
+      <PlaidConnect onConnected={load} />
 
       <div className="wc-card p-6">
         <p className="text-xs uppercase tracking-wide text-slate-400">Total net worth</p>

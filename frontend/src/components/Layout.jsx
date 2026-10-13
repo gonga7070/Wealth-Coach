@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Wallet, PieChart, Brain, Target, Sliders, RefreshCw,
-  PiggyBank, TrendingUp, MessageSquare, Bell, User, Crown, LogOut, Menu, Sparkles,
+  PiggyBank, TrendingUp, MessageSquare, Bell, User, Crown, LogOut, Menu, Sparkles, Bird,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { OwlAvatar } from "@/components/OwlMascot";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import api from "@/lib/api";
 
@@ -159,14 +158,18 @@ export default function Layout() {
         {BOTTOM.slice(0, 2).map((item) => (
           <BottomLink key={item.to} item={item} />
         ))}
-        <button
-          onClick={() => navigate("/app/coach")}
+        <NavLink
+          to="/app/coach"
           data-testid="bottomnav-coach"
-          className="flex flex-col items-center -mt-6"
+          className={({ isActive }) =>
+            `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium ${
+              isActive ? "text-amber-300" : "text-slate-500"
+            }`
+          }
         >
-          <OwlAvatar size={46} />
-          <span className="text-[10px] text-amber-300 font-medium mt-0.5">Coach</span>
-        </button>
+          <Bird size={20} />
+          Coach
+        </NavLink>
         {BOTTOM.slice(2).map((item) => (
           <BottomLink key={item.to} item={item} />
         ))}
