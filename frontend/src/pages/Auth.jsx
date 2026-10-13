@@ -121,7 +121,6 @@ export default function Auth({ mode }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
                 data-testid="password-input"
                 placeholder="••••••••"
                 className="mt-1.5 h-11 bg-white/5 border-white/12 rounded-xl"
@@ -135,7 +134,6 @@ export default function Auth({ mode }) {
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   required
-                  minLength={6}
                   data-testid="confirm-password-input"
                   placeholder="••••••••"
                   className="mt-1.5 h-11 bg-white/5 border-white/12 rounded-xl"

@@ -1,0 +1,29 @@
+{
+  "summary": "Frontend-only auth UI test run for Wealth Coach. 11/12 flows verified end-to-end against the live preview URL. Signup validation (mismatch, duplicate email, valid->/onboarding), login valid+invalid, session persistence on reload, logout, protected-route redirect, forgot-password nav/submit->sent screen, reset-password no-token and mismatch all work correctly. One bug found: the inline 'Password must be at least 6 characters.' error never surfaces because the password <Input> has HTML5 minLength={6}, so the browser's native tooltip blocks submission before React's custom validator runs. Same issue on /reset-password short-password case.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "pages/Auth.jsx (register) + pages/ResetPassword.jsx", "issue": "Password inputs have HTML5 minLength={6}. When user submits a <6 char password, the browser's native validation tooltip ('Please lengthen this text to 6 characters or more...') fires and the form never submits, so the required inline React error 'Password must be at least 6 characters.' inside [data-testid=auth-error]/[data-testid=reset-error] is never rendered. Verified in test: signup_short_password -> error_shown=False.", "selector": "[data-testid=password-input], [data-testid=confirm-password-input], [data-testid=reset-password-input], [data-testid=reset-confirm-input]", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Remove minLength={6} (and the matching attribute on confirm/reset inputs) from the password <Input> elements in /app/frontend/src/pages/Auth.jsx and /app/frontend/src/pages/ResetPassword.jsx so the React-level length check in submit() runs and the inline [data-testid=auth-error]/[data-testid=reset-error] message is shown. The JS length check already exists; just drop the HTML attribute (or switch to noValidate on the <form>)."
+  ],
+  "critical_code_review_comments": [
+    "HTML5 minLength conflicts with custom inline error UX — pick one validation layer. The spec explicitly expects the inline React error, so native validation should be disabled on these inputs.",
+    "Auth.jsx submit navigates to /onboarding or /app based on user.onboarded — relies on backend returning onboarded flag; works today but worth a unit test to prevent regressions.",
+    "ForgotPassword.jsx shows a generic 'If an account exists' message (good, prevents account enumeration) — matches security best practice.",
+    "ResetPassword.jsx: when token is missing, the form is hidden but the h1/subtitle 'Choose a new password / Pick something you'll remember' still render above the error banner — minor UX polish (consider hiding heading when !token)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not tested)", "frontend": "~92% (11/12 scenarios passing)"},
+  "test_credentials": "alex@demo.com / password123 (existing). New signups used test+<random>@demo.com (one was created: test+499384@demo.com — reached /onboarding).",
+  "seed_data_creation": "One test account created during signup_valid test: test+499384@demo.com (not completed through onboarding). Safe to ignore or purge.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "After main agent removes minLength={6} (or adds noValidate), re-verify (a) /register with 3-char password shows [data-testid=auth-error] with text 'Password must be at least 6 characters.' and does NOT submit, and (b) /reset-password?token=abc with 3-char password shows [data-testid=reset-error] with same text (currently the previous mismatch error leaks through because form never submits). Everything else (login valid/invalid, session reload persistence, logout, protected route redirect, forgot flow sent screen, reset no-token banner, reset mismatch error) is already confirmed working.",
+  "rca of the issue": "React form submit handler sets setError('Password must be at least 6 characters.') when password.length < 6. However, the <Input> components (shadcn Input -> native <input>) have minLength={6} + required. Browsers run constraint validation BEFORE invoking the submit handler; failing constraints raise an 'invalid' event and prevent form submission, surfacing the browser's own tooltip instead. Mitigation: remove minLength from the input, or set noValidate on the <form>, or call e.target.setAttribute('novalidate','') — any of these allows the submit handler to run and the inline [data-testid=auth-error] message to render."
+}

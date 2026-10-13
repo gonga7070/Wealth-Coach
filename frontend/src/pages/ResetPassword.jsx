@@ -63,7 +63,6 @@ export default function ResetPassword() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
                   data-testid="reset-password-input"
                   placeholder="••••••••"
                   className="mt-1.5 h-11 bg-white/5 border-white/12 rounded-xl"
@@ -76,7 +75,6 @@ export default function ResetPassword() {
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   required
-                  minLength={6}
                   data-testid="reset-confirm-input"
                   placeholder="••••••••"
                   className="mt-1.5 h-11 bg-white/5 border-white/12 rounded-xl"

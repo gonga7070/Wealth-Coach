@@ -32,6 +32,14 @@ Money overview & net worth · spending breakdown · AI insights · goals (create
 - Responsive: desktop sidebar + mobile bottom nav with center owl + more-menu sheet.
 - **Tested:** 25/25 backend pytest pass; all frontend flows verified. No critical bugs.
 
+## Authentication system (COMPLETED — 2026-06)
+- Custom JWT bearer auth (bcrypt + PyJWT), token in localStorage `wc_token`, persists across refresh. Kept existing system (not refactored to cookies) to avoid breaking Plaid/data flows.
+- Sign Up now has **confirm-password** field + inline error messages (data-testid `auth-error`): min-6-char and password-match checks (removed HTML5 minLength so React inline errors surface). Duplicate-email and wrong-password errors shown inline.
+- **Password reset by email** via Emergent-managed email proxy (`email_service.py`, EMERGENT_EMAIL_KEY + EMAIL_FROM_NAME="Wealth Coach" — no Resend key needed). `/auth/forgot-password` (generic response, no account enumeration) emails a 1hr single-use link `{origin}/reset-password?token=`; token stored sha256-hashed in `password_reset_tokens` (TTL index). `/auth/reset-password` validates invalid/expired/used + min length, updates bcrypt hash.
+- New pages `ForgotPassword.jsx` + `ResetPassword.jsx`; routes added in App.js. Design matches existing.
+- Logout clears token → Welcome; Protected routes redirect to /login; all data/Plaid endpoints scoped to user id.
+- **Tested:** backend logic fully verified (register dup, login ok/fail, forgot generic + real email 202, reset invalid/short/valid/reuse/expired, login with new pw). Frontend iteration_4: 12/12 after minLength fix (signup validation, login, session reload, logout, protected redirect, forgot sent screen, reset token/validation).
+
 ## Plaid bank connection (DONE — 2026-06, Sandbox)
 - Env: PLAID_CLIENT_ID / PLAID_SECRET / PLAID_ENV (=sandbox) + TOKEN_ENCRYPTION_KEY (Fernet). Secrets backend-only.
 - Backend: `plaid_client.py` (httpx calls, token encrypt/decrypt, account/txn mapping) + routes in server.py: `/api/plaid/status|link-token|exchange|disconnect`. All user-scoped via user["id"]; access_token encrypted at rest in `plaid_items`.
