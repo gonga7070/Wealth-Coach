@@ -18,6 +18,7 @@ import logging
 
 import seed as seed_mod
 import coach as coach_mod
+import plaid_client as plaid
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wealthcoach")
@@ -730,6 +731,109 @@ async def upgrade(user: dict = Depends(get_current_user)):
 async def reset_demo(user: dict = Depends(get_current_user)):
     u = await db.users.find_one({"_id": oid(user["id"])})
     await seed_user_data(user["id"], u.get("primary_goal", "Save more"), u.get("banks"))
+    return {"ok": True}
+
+
+class PlaidExchangeReq(BaseModel):
+    public_token: str
+
+
+# ---------------- Plaid bank connection ----------------
+@api.get("/plaid/status")
+async def plaid_status(user: dict = Depends(get_current_user)):
+    connected = await db.plaid_items.find_one({"user_id": user["id"]}) is not None
+    return {"enabled": plaid.PLAID_ENABLED, "env": plaid.PLAID_ENV, "connected": connected}
+
+
+@api.post("/plaid/link-token")
+async def plaid_link_token(user: dict = Depends(get_current_user)):
+    if not plaid.PLAID_ENABLED:
+        raise HTTPException(status_code=400, detail="Bank connection isn't configured yet. Add your Plaid API keys to enable it.")
+    try:
+        data = await plaid.plaid_request("/link/token/create", {
+            "client_name": "Wealth Coach",
+            "user": {"client_user_id": user["id"]},
+            "products": ["transactions"],
+            "country_codes": ["US", "CA"],
+            "language": "en",
+            "transactions": {"days_requested": 90},
+        })
+    except plaid.PlaidError as e:
+        raise HTTPException(status_code=502, detail=e.message)
+    return {"link_token": data["link_token"]}
+
+
+@api.post("/plaid/exchange")
+async def plaid_exchange(req: PlaidExchangeReq, user: dict = Depends(get_current_user)):
+    if not plaid.PLAID_ENABLED:
+        raise HTTPException(status_code=400, detail="Bank connection isn't configured.")
+    try:
+        ex = await plaid.plaid_request("/item/public_token/exchange", {"public_token": req.public_token})
+        access_token = ex["access_token"]
+        item_id = ex["item_id"]
+
+        item = await plaid.plaid_request("/item/get", {"access_token": access_token})
+        inst_name = "Your Bank"
+        inst_id = (item.get("item") or {}).get("institution_id")
+        if inst_id:
+            try:
+                inst = await plaid.plaid_request("/institutions/get_by_id", {
+                    "institution_id": inst_id, "country_codes": ["US", "CA"]})
+                inst_name = (inst.get("institution") or {}).get("name", inst_name)
+            except plaid.PlaidError:
+                pass
+
+        acc = await plaid.plaid_request("/accounts/get", {"access_token": access_token})
+        plaid_accounts = acc.get("accounts", [])
+
+        # pull transactions
+        added, cursor = [], ""
+        for _ in range(10):
+            page = await plaid.plaid_request("/transactions/sync", {
+                "access_token": access_token, "cursor": cursor, "count": 500})
+            added += page.get("added", [])
+            cursor = page.get("next_cursor", cursor)
+            if not page.get("has_more"):
+                break
+    except plaid.PlaidError as e:
+        raise HTTPException(status_code=502, detail=e.message)
+
+    # store encrypted item
+    await db.plaid_items.update_one(
+        {"user_id": user["id"], "item_id": item_id},
+        {"$set": {"user_id": user["id"], "item_id": item_id,
+                  "access_token": plaid.encrypt_token(access_token),
+                  "institution": inst_name,
+                  "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True,
+    )
+
+    # import accounts into our schema (replace demo data on first real connect)
+    await db.accounts.delete_many({"user_id": user["id"]})
+    await db.transactions.delete_many({"user_id": user["id"]})
+    mapped = plaid.map_accounts(plaid_accounts, inst_name, user["id"])
+    id_map = {}
+    for m in mapped:
+        pid = m.pop("plaid_account_id")
+        res = await db.accounts.insert_one(m)
+        id_map[pid] = str(res.inserted_id)
+    txns = plaid.map_transactions(added, id_map, user["id"])
+    if txns:
+        await db.transactions.insert_many(txns)
+
+    await db.users.update_one({"_id": oid(user["id"])}, {"$set": {"banks": [inst_name]}})
+    return {"ok": True, "institution": inst_name, "accounts": len(mapped), "transactions": len(txns)}
+
+
+@api.post("/plaid/disconnect")
+async def plaid_disconnect(user: dict = Depends(get_current_user)):
+    item = await db.plaid_items.find_one({"user_id": user["id"]})
+    if item and plaid.PLAID_ENABLED:
+        try:
+            await plaid.plaid_request("/item/remove", {"access_token": plaid.decrypt_token(item["access_token"])})
+        except plaid.PlaidError:
+            pass
+    await db.plaid_items.delete_many({"user_id": user["id"]})
     return {"ok": True}
 
 
