@@ -1278,7 +1278,13 @@ async def export_data(user: dict = Depends(get_current_user)):
 
 @api.post("/profile/reset-data")
 async def reset_data(user: dict = Depends(get_current_user)):
-    """Wipe all of the user's financial data back to zero but keep them logged in."""
+    """Wipe the user's FINANCIAL data back to zero but keep their identity and non-financial settings.
+
+    Removed: connected banks, accounts, transactions, goals, budgets, recurring, portfolio/investing,
+    notifications, coach history, and the stated financial goal.
+    Kept: name, email, country, login/session, email-verified status, and preferences
+    (theme, display currency, date format, notifications toggles).
+    """
     for item in await db.plaid_items.find({"user_id": user["id"]}).to_list(100):
         if plaid.PLAID_ENABLED:
             try:
@@ -1288,11 +1294,9 @@ async def reset_data(user: dict = Depends(get_current_user)):
     for coll in ("accounts", "transactions", "goals", "budget", "recurring", "notifications",
                  "coach_messages", "plaid_items"):
         await db[coll].delete_many({"user_id": user["id"]})
-    u = await db.users.find_one({"_id": oid(user["id"])})
-    cur = "CAD" if (u.get("country") or "").strip().lower() == "canada" else "USD"
+    # Keep name/email/country/preferences/onboarded; only clear financial fields.
     await db.users.update_one({"_id": oid(user["id"])}, {"$set": {
-        "demo_mode": False, "banks": [], "primary_goal": "", "help_with": [],
-        "preferences": {**DEFAULT_PREFS, "display_currency": cur},
+        "demo_mode": False, "banks": [], "primary_goal": "",
     }})
     return {"ok": True}
 

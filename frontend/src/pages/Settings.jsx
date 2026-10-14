@@ -318,14 +318,14 @@ export default function Settings() {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button data-testid="reset-app-btn" className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition">
-                <RotateCcw size={20} className="text-amber-400" /><div className="flex-1"><div className="font-medium">Reset app to zero</div><div className="text-xs text-slate-500">Clear all your data and start fresh — you stay logged in</div></div>
+                <RotateCcw size={20} className="text-amber-400" /><div className="flex-1"><div className="font-medium">Reset financial data</div><div className="text-xs text-slate-500">Clear banks, accounts, goals & portfolio — keeps your name and settings</div></div>
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent className="wc-glass border-white/10" data-testid="reset-app-dialog">
               <AlertDialogHeader>
-                <AlertDialogTitle>Reset everything to zero?</AlertDialogTitle>
+                <AlertDialogTitle>Reset financial data to zero?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This permanently removes all your accounts, transactions, goals, budgets and connected banks, setting everything back to zero. You'll stay logged in. This can't be undone.
+                  This permanently removes all your accounts, transactions, goals, budgets, portfolio and connected banks, setting your money back to zero. Your name, email and app settings are kept, and you stay logged in. This can't be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

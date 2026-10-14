@@ -13,7 +13,7 @@ A dark, premium, friendly, slightly-entertaining web app (mobile + desktop) call
 ## Reset-to-zero + menu Settings (COMPLETED & TESTED — 2026-06)
 - Mobile hamburger (3-bars) menu now has a **Settings** entry (the Profile nav was renamed Settings, gear icon) and a **"Reset app to zero"** action with explanation ("Clears all your data and starts fresh. You stay logged in.").
 - Same reset also added to Settings → Privacy & data (reset-app-btn → confirm dialog).
-- Backend POST `/profile/reset-data`: removes Plaid items (from Plaid), wipes accounts/transactions/goals/budget/recurring/notifications/coach_messages/plaid_items, resets goal/help/banks/preferences to defaults, keeps user logged in (onboarded stays true). Does NOT delete the account or require re-login.
+- Backend POST `/profile/reset-data`: removes Plaid items (from Plaid), wipes accounts/transactions/goals/budget/recurring/notifications/coach_messages/plaid_items, clears banks + primary_goal + demo_mode. **Keeps name, email, country, onboarded status, and preferences (theme/currency/date/notifications).** Does NOT delete the account or require re-login. Reset only clears FINANCIAL data; non-financial identity/settings are preserved.
 - Tested: seeded data → reset → 0 accounts / $0 net worth / empty dashboard, `/auth/me` still 200 with same token; mobile menu shows Settings + reset button.
 
 ## Manual transaction entry (COMPLETED & TESTED — 2026-06)

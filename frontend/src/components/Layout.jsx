@@ -88,7 +88,7 @@ export default function Layout() {
 
   const resetApp = async () => {
     if (!window.confirm(
-      "Reset everything back to zero? This permanently removes all your accounts, transactions, goals, budgets and connected banks. You'll stay logged in. This can't be undone."
+      "Reset your financial data to zero? This permanently removes all your accounts, transactions, goals, budgets, portfolio and connected banks. Your name and settings are kept and you stay logged in. This can't be undone."
     )) return;
     setResetting(true);
     try {
@@ -191,7 +191,7 @@ export default function Layout() {
                   >
                     <RotateCcw size={18} /> {resetting ? "Resetting…" : "Reset app to zero"}
                   </button>
-                  <p className="px-3.5 text-[11px] text-slate-500 leading-snug">Clears all your data and starts fresh. You stay logged in.</p>
+                  <p className="px-3.5 text-[11px] text-slate-500 leading-snug">Clears your banks, accounts, transactions, goals and portfolio. Keeps your name and settings. You stay logged in.</p>
                   <button
                     onClick={() => { logout(); navigate("/"); }}
                     className="mt-1 w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-rose-400 hover:bg-white/5"
