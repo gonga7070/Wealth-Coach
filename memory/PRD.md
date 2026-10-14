@@ -10,6 +10,12 @@ A dark, premium, friendly, slightly-entertaining web app (mobile + desktop) call
 - **Demo data:** Realistic per-user seed (5 accounts, ~2 months of transactions, 3 goals, budget, recurring bills/subscriptions, notifications) generated on onboarding.
 
 
+## Reset-to-zero + menu Settings (COMPLETED & TESTED — 2026-06)
+- Mobile hamburger (3-bars) menu now has a **Settings** entry (the Profile nav was renamed Settings, gear icon) and a **"Reset app to zero"** action with explanation ("Clears all your data and starts fresh. You stay logged in.").
+- Same reset also added to Settings → Privacy & data (reset-app-btn → confirm dialog).
+- Backend POST `/profile/reset-data`: removes Plaid items (from Plaid), wipes accounts/transactions/goals/budget/recurring/notifications/coach_messages/plaid_items, resets goal/help/banks/preferences to defaults, keeps user logged in (onboarded stays true). Does NOT delete the account or require re-login.
+- Tested: seeded data → reset → 0 accounts / $0 net worth / empty dashboard, `/auth/me` still 200 with same token; mobile menu shows Settings + reset button.
+
 ## Manual transaction entry (COMPLETED & TESTED — 2026-06)
 - Account Details page: manual accounts get an "Add transaction" button and each row opens an edit dialog (edit fields or delete). Bank accounts stay read-only (recategorize only).
 - Dialog fields: description, type (Expense/Income), amount, category, date, note.

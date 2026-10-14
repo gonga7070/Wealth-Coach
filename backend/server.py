@@ -1276,6 +1276,27 @@ async def export_data(user: dict = Depends(get_current_user)):
     return out
 
 
+@api.post("/profile/reset-data")
+async def reset_data(user: dict = Depends(get_current_user)):
+    """Wipe all of the user's financial data back to zero but keep them logged in."""
+    for item in await db.plaid_items.find({"user_id": user["id"]}).to_list(100):
+        if plaid.PLAID_ENABLED:
+            try:
+                await plaid.plaid_request("/item/remove", {"access_token": plaid.decrypt_token(item["access_token"])})
+            except plaid.PlaidError:
+                pass
+    for coll in ("accounts", "transactions", "goals", "budget", "recurring", "notifications",
+                 "coach_messages", "plaid_items"):
+        await db[coll].delete_many({"user_id": user["id"]})
+    u = await db.users.find_one({"_id": oid(user["id"])})
+    cur = "CAD" if (u.get("country") or "").strip().lower() == "canada" else "USD"
+    await db.users.update_one({"_id": oid(user["id"])}, {"$set": {
+        "demo_mode": False, "banks": [], "primary_goal": "", "help_with": [],
+        "preferences": {**DEFAULT_PREFS, "display_currency": cur},
+    }})
+    return {"ok": True}
+
+
 @api.delete("/profile")
 async def delete_account_endpoint(user: dict = Depends(get_current_user)):
     for item in await db.plaid_items.find({"user_id": user["id"]}).to_list(100):

@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Wallet, PieChart, Brain, Target, Sliders, RefreshCw,
-  PiggyBank, TrendingUp, MessageSquare, Bell, User, Crown, LogOut, Menu, Sparkles,
+  PiggyBank, TrendingUp, MessageSquare, Bell, Settings, Crown, LogOut, Menu, RotateCcw,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import api from "@/lib/api";
 import VerifyBanner from "@/components/VerifyBanner";
+import { toast } from "sonner";
 
 function OwlFace({ size = 20 }) {
   return (
@@ -47,7 +48,7 @@ const NAV = [
   { to: "/app/investing", label: "Investing", icon: TrendingUp },
   { to: "/app/coach", label: "Ask Coach", icon: MessageSquare },
   { to: "/app/notifications", label: "Alerts", icon: Bell },
-  { to: "/app/profile", label: "Profile", icon: User },
+  { to: "/app/profile", label: "Settings", icon: Settings },
 ];
 
 const BOTTOM = [NAV[0], NAV[1], NAV[3], NAV[4]];
@@ -75,14 +76,32 @@ function NavItem({ item, onClick }) {
 }
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     api.get("/notifications").then((r) => setUnread(r.data.unread)).catch(() => {});
   }, []);
+
+  const resetApp = async () => {
+    if (!window.confirm(
+      "Reset everything back to zero? This permanently removes all your accounts, transactions, goals, budgets and connected banks. You'll stay logged in. This can't be undone."
+    )) return;
+    setResetting(true);
+    try {
+      await api.post("/profile/reset-data");
+      await refreshUser();
+      setMoreOpen(false);
+      toast.success("Everything's been reset to zero.");
+      setTimeout(() => window.location.assign("/app"), 400);
+    } catch {
+      toast.error("Couldn't reset. Please try again.");
+      setResetting(false);
+    }
+  };
 
   return (
     <div className="wc-app-bg min-h-screen flex text-slate-100">
@@ -163,13 +182,24 @@ export default function Layout() {
                   ))}
                   <NavItem item={{ to: "/app/premium", label: "Wealth Coach Plus", icon: Crown }} onClick={() => setMoreOpen(false)} />
                 </nav>
-                <button
-                  onClick={() => { logout(); navigate("/"); }}
-                  className="mt-4 w-full flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm text-rose-400 hover:bg-white/5"
-                  data-testid="mobile-logout-btn"
-                >
-                  <LogOut size={18} /> Log out
-                </button>
+                <div className="mt-4 pt-4 border-t border-white/8 space-y-1">
+                  <button
+                    onClick={resetApp}
+                    disabled={resetting}
+                    data-testid="mobile-reset-app-btn"
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-amber-300 hover:bg-white/5 transition disabled:opacity-60"
+                  >
+                    <RotateCcw size={18} /> {resetting ? "Resetting…" : "Reset app to zero"}
+                  </button>
+                  <p className="px-3.5 text-[11px] text-slate-500 leading-snug">Clears all your data and starts fresh. You stay logged in.</p>
+                  <button
+                    onClick={() => { logout(); navigate("/"); }}
+                    className="mt-1 w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-rose-400 hover:bg-white/5"
+                    data-testid="mobile-logout-btn"
+                  >
+                    <LogOut size={18} /> Log out
+                  </button>
+                </div>
               </SheetContent>
             </Sheet>
           </div>

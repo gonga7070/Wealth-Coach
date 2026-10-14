@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import {
   User, Crown, Download, Trash2, RefreshCw, LogOut, Moon, Sun, ShieldCheck, Lock,
-  Building2, Link2, CheckCircle2, MailWarning, Loader2, Bell,
+  Building2, Link2, CheckCircle2, MailWarning, Loader2, Bell, RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -161,6 +161,15 @@ export default function Settings() {
   const deleteAccount = async () => {
     try { await api.delete("/profile"); toast("Your account has been deleted"); logout(); navigate("/"); }
     catch { toast.error("Couldn't delete account"); }
+  };
+
+  const resetData = async () => {
+    try {
+      await api.post("/profile/reset-data");
+      await refreshUser();
+      toast.success("Everything's been reset to zero.");
+      setTimeout(() => window.location.assign("/app"), 400);
+    } catch { toast.error("Couldn't reset. Please try again."); }
   };
 
   const notif = prefs.notifications || {};
@@ -306,6 +315,25 @@ export default function Settings() {
           <button onClick={exportData} data-testid="export-data-btn" className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition">
             <Download size={20} className="text-slate-400" /><div className="flex-1"><div className="font-medium">Export my data</div><div className="text-xs text-slate-500">Download everything as JSON</div></div>
           </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button data-testid="reset-app-btn" className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition">
+                <RotateCcw size={20} className="text-amber-400" /><div className="flex-1"><div className="font-medium">Reset app to zero</div><div className="text-xs text-slate-500">Clear all your data and start fresh — you stay logged in</div></div>
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="wc-glass border-white/10" data-testid="reset-app-dialog">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset everything to zero?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently removes all your accounts, transactions, goals, budgets and connected banks, setting everything back to zero. You'll stay logged in. This can't be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={resetData} data-testid="confirm-reset-app-btn" className="rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold">Reset to zero</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button data-testid="delete-account-btn" className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition">
