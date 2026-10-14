@@ -121,9 +121,9 @@ export default function Home() {
       {hasData && (<>
       {/* Net worth + health score */}
       <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="wc-card p-6 md:col-span-2" data-testid="networth-card">
+        <div className="wc-card wc-hero-glow p-6 md:p-8 md:col-span-2" data-testid="networth-card">
           <p className="text-xs uppercase tracking-wide text-slate-400">Net worth</p>
-          <div className="font-num text-4xl sm:text-5xl font-extrabold mt-2">
+          <div className="font-num text-4xl sm:text-5xl lg:text-6xl font-extrabold mt-2 tracking-tight">
             <CountUp value={o.net_worth} format={(v) => fmt(v)} />
           </div>
           <div className={`inline-flex items-center gap-1 mt-3 text-sm font-medium ${up ? "text-emerald-400" : "text-rose-400"}`}>
