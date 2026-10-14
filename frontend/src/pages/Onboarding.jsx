@@ -92,7 +92,7 @@ export default function Onboarding() {
         {COUNTRIES.map((co) => (
           <button
             key={co.c}
-            onClick={() => { setCountry(co.c); setBanks([]); }}
+            onClick={() => setCountry(co.c)}
             data-testid={`country-${co.c.toLowerCase().replace(/ /g, "-")}`}
             className={`wc-card p-3.5 flex items-center gap-2.5 text-left transition-all ${
               country === co.c ? "border-amber-500/60 bg-amber-500/10" : "wc-card-hover"

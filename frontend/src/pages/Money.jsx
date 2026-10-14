@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api, { apiErr } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import { fmtCur } from "@/lib/format";
 import PlaidConnect from "@/components/PlaidConnect";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,9 @@ const TYPE_META = {
   loan: { icon: Landmark, color: "#A855F7", label: "Loan" },
 };
 
-function AddAccountDialog({ onAdded }) {
+function AddAccountDialog({ onAdded, defaultCurrency = "USD" }) {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", type: "checking", institution: "", balance: "", currency: "USD" });
+  const [form, setForm] = useState({ name: "", type: "checking", institution: "", balance: "", currency: defaultCurrency });
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
@@ -39,7 +40,7 @@ function AddAccountDialog({ onAdded }) {
       });
       toast.success("Account added");
       setOpen(false);
-      setForm({ name: "", type: "checking", institution: "", balance: "", currency: "USD" });
+      setForm({ name: "", type: "checking", institution: "", balance: "", currency: defaultCurrency });
       onAdded && onAdded();
     } catch (e) {
       toast.error(apiErr(e.response?.data?.detail));
@@ -105,6 +106,8 @@ function AddAccountDialog({ onAdded }) {
 
 export default function Money() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dc = user?.preferences?.display_currency || "USD";
   const [data, setData] = useState(null);
 
   const load = useCallback(() => {
@@ -129,7 +132,7 @@ export default function Money() {
           <h1 className="font-head text-2xl sm:text-3xl font-extrabold">Your money</h1>
           <p className="text-slate-400 mt-1">Everything you own and owe, in one place.</p>
         </div>
-        {!isEmpty && <AddAccountDialog onAdded={load} />}
+        {!isEmpty && <AddAccountDialog onAdded={load} defaultCurrency={dc} />}
       </div>
 
       <PlaidConnect onConnected={load} />
@@ -144,7 +147,7 @@ export default function Money() {
             Connect a bank above to securely import your real balances and transactions, or add an account manually to get started.
           </p>
           <div className="mt-5 flex items-center justify-center">
-            <AddAccountDialog onAdded={load} />
+            <AddAccountDialog onAdded={load} defaultCurrency={dc} />
           </div>
         </div>
       ) : (

@@ -1,0 +1,31 @@
+{
+  "summary": "Frontend-only UI validation of Phase 1 Wealth Coach features (empty states, manual accounts, per-currency, Settings sections, change password, prefs persistence, notification toggle, export, delete-dialog cancel, alex regression, Plaid button, onboarding 3-choice). 24/25 scenarios pass end-to-end. ONE CRITICAL BUG: Onboarding.jsx country-select buttons call `setBanks([])` but `setBanks` is not defined in the component — clicking any country throws a React runtime error (Emergent runtime overlay: 'setBanks is not defined' at bundle.js:16024:11), freezing the onboarding flow for every brand-new signup. This blocks the entire real-signup -> start-sample / start-manual / start-connect path. Everything else (verify banner + resend toast, home empty state + CTA, money empty state + add-account, manual CAD account with CA$ + Manual badge, Settings 7 sections, edit profile name persistence, change-password wrong/mismatch/valid, prefs CAD + DD/MM persist after reload, budget_alerts toggle persist, JSON export download, delete dialog opens + Cancel closes, alex demo regression dashboard loaded, Plaid button renders on Money) works.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "pages/Onboarding.jsx (country step, line 95)", "issue": "onClick calls `setBanks([])` but `setBanks` state setter is never declared (component only has name/country/goal/help/loading state). Clicking ANY country button raises 'ReferenceError: setBanks is not defined' and the Emergent runtime-error overlay takes over the screen. This blocks every new signup from completing onboarding, so the start-connect-btn / start-manual-btn / start-sample-btn step is unreachable in the real UI path. Reproduce: register new user -> /onboarding -> type name -> Continue -> click [data-testid=country-canada] -> runtime error.", "selector": "[data-testid=country-canada], [data-testid=country-united-states]", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "In /app/frontend/src/pages/Onboarding.jsx line 95, remove the stray `setBanks([])` call inside the country button onClick — it's leftover from a previous step and `banks` state no longer exists. Change `onClick={() => { setCountry(co.c); setBanks([]); }}` to `onClick={() => setCountry(co.c)}`. After fix, re-run the onboarding E2E to confirm start-sample-btn lands on dashboard with sample data and start-manual/start-connect land on /app/money empty state."
+  ],
+  "critical_code_review_comments": [
+    "Onboarding.jsx: dead reference to removed `setBanks` state — this must have been caught in review. Suggest wiring up a lint rule or at least a quick smoke test of the onboarding flow in CI.",
+    "Money.jsx: UI correctly suppresses the top-right Add-account button when `isEmpty` (showing the empty-state version instead) — good UX but means two separate <AddAccountDialog /> trees exist in the DOM depending on state; fine today, worth a note.",
+    "Settings.jsx: both the profile edit dialog and change-password dialog correctly await `refreshUser()` before closing — persistence works. Export uses blob + revokeObjectURL properly.",
+    "VerifyBanner.jsx: once a user hits Resend, the button is disabled permanently (`disabled={sending || sent}`). If the email fails to arrive the user has no retry inside the same session; consider a short cooldown instead of a hard lock.",
+    "Onboarding.jsx goal step: `setGoal` has no deselect — clicking the same goal doesn't toggle off. Minor.",
+    "Money AddAccountDialog defaults currency to USD even though the signed-in user may have country=Canada / display_currency=CAD. Consider defaulting form.currency to user.preferences.display_currency."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not tested, per request)", "frontend": "96% (24/25 scenarios). The one failure (onboarding country click) is critical and blocks real new-user signup end-to-end."},
+  "test_credentials": "realuser@demo.com / password123 (verified password UNCHANGED — tested wrong/mismatch/valid change then reverted). alex@demo.com / password123 (regression). New signup created during T13: test+330945@demo.com (stuck on onboarding country step due to setBanks bug — safe to purge).",
+  "seed_data_creation": "Created one manual account on realuser@demo.com: 'TEST_CAD_Checking' (CAD, $1500, type=checking). Realuser's profile name was changed to 'Real Tester' and preferences changed to display_currency=CAD / date_format=DD/MM/YYYY and notif.budget_alerts toggled. Also created test+330945@demo.com (not onboarded).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Only onboarding country-click flow needs re-verification after main agent removes `setBanks([])` from Onboarding.jsx line 95. All other 24 flows (verify banner + resend, home/money empty states, manual CAD account + per-currency CA$ + Manual badge, Settings 7 sections rendered, edit-name persistence after reload, change-password 3 variants + revert, prefs CAD+DD/MM persist, notif-budget_alerts toggle persist, JSON export download, delete-account dialog opens + Cancel closes, alex regression dashboard, plaid-connect-btn visible on Money) are already confirmed passing against the live preview URL. After fix, re-register a brand-new test+<rand>@demo.com user, step through onboarding to the final step, click start-sample-btn and confirm /app renders networth-card (no home-empty-state); separately re-run with start-manual-btn and confirm /app/money renders money-empty-state.",
+  "rca of the issue": "Onboarding.jsx previously had a `banks` state (likely for a 'select which bank' step). That state was removed, but one leftover reference `setBanks([])` was left inside the country-button onClick (`onClick={() => { setCountry(co.c); setBanks([]); }}` at line 95). React doesn't catch undefined identifiers at render time; the ReferenceError only fires on click, which is why the previous iteration's auth-only tests didn't trip it. Mitigation: delete the `setBanks([])` call. One-liner fix."
+}

@@ -9,6 +9,33 @@ A dark, premium, friendly, slightly-entertaining web app (mobile + desktop) call
 - **AI Coach:** Claude Sonnet 5.5 via `emergentintegrations` + `EMERGENT_LLM_KEY`. Answers using the user's live financial snapshot; chat history persisted in Mongo.
 - **Demo data:** Realistic per-user seed (5 accounts, ~2 months of transactions, 3 goals, budget, recurring bills/subscriptions, notifications) generated on onboarding.
 
+
+## Real-user Phase 1 (COMPLETED & TESTED — 2026-06)
+Turned the demo prototype into a real-data app. User choices: empty-by-default + labeled sample mode; per-currency (no CAD/USD blending); soft email-verification gate; manual entry included; Plaid stays Sandbox.
+
+Backend (server.py, plaid_client.py, email_service.py):
+- Onboarding no longer auto-seeds; `use_demo` flag controls sample data; new users start empty with `demo_mode` + `preferences` + `email_verified:false`.
+- Email verification: `/auth/send-verification`, `/auth/verify-email` (24h single-use token, TTL index), verification email on register. Soft gate (banner only).
+- `/auth/change-password` (bcrypt, current-password check).
+- Plaid multi-connect: exchange APPENDS institutions, stores per-item cursor/logo/currency/last_sync; first real connect clears demo. `/plaid/items`, `/plaid/refresh`, `/plaid/reconnect` (update-mode token), `/plaid/disconnect` per-item.
+- Manual entry: POST `/accounts`, PATCH/DELETE `/accounts/{id}`, POST `/transactions`, DELETE `/transactions/{id}` (manual-only). `source` field distinguishes bank vs manual.
+- `/accounts` returns `by_currency` + `last_updated`. Preferences GET/PUT `/profile/preferences`. `/profile/export` (JSON), DELETE `/profile`.
+
+Frontend:
+- VerifyBanner + VerifyEmail page (/verify-email). Onboarding real 3-choice final step (connect/manual/sample); fake bank picker removed.
+- Home + Money empty states; Money manual AddAccountDialog, per-currency net worth, source+logo badges, last-updated.
+- Settings page (replaces Profile): Profile, Security (verify status + change password), Bank connections (items + sync/reconnect/disconnect), Financial preferences, Notifications, Appearance, Privacy & data (consent, export, delete account).
+- AuthContext.refreshUser; user carries email_verified/demo_mode/preferences.
+
+Tested: backend all endpoints via scripts; frontend iteration_5 25/25 (onboarding setBanks bug fixed). Sandbox Plaid multi-connect verified.
+
+## Phase 2 backlog (not yet built)
+- Manual transaction add/edit UI on Account Details (backend endpoints exist).
+- Deeper empty states for Spending/Insights/Goals/Budget (zero-safe but minimal).
+- Health score shows ~65 base on empty data (cosmetic — consider "—" when no accounts).
+- Optional live FX conversion (user chose per-currency only).
+- Production Plaid (needs user creds + Plaid production + Canada/Transactions approval).
+
 ## User Personas
 - Everyday earner who finds banking apps overwhelming and wants plain-language guidance.
 - Goal-driven saver (emergency fund, vacation, car, home) tracking progress.
