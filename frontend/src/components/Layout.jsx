@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Wallet, PieChart, Brain, Target, Sliders, RefreshCw,
-  PiggyBank, TrendingUp, MessageSquare, Bell, Settings, Crown, LogOut, Menu, RotateCcw,
+  PiggyBank, MessageSquare, Bell, Settings, Crown, LogOut, Menu, RotateCcw,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -45,7 +45,6 @@ const NAV = [
   { to: "/app/budget", label: "Spending Plan", icon: Sliders },
   { to: "/app/recurring", label: "Recurring", icon: RefreshCw },
   { to: "/app/savings", label: "Savings", icon: PiggyBank },
-  { to: "/app/investing", label: "Investing", icon: TrendingUp },
   { to: "/app/coach", label: "Ask Coach", icon: MessageSquare },
   { to: "/app/notifications", label: "Alerts", icon: Bell },
   { to: "/app/profile", label: "Settings", icon: Settings },

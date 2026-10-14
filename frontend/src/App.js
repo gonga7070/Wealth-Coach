@@ -20,7 +20,6 @@ import GoalDetails from "@/pages/GoalDetails";
 import Budget from "@/pages/Budget";
 import Recurring from "@/pages/Recurring";
 import Savings from "@/pages/Savings";
-import Investing from "@/pages/Investing";
 import Coach from "@/pages/Coach";
 import Notifications from "@/pages/Notifications";
 import Profile from "@/pages/Settings";
@@ -71,7 +70,6 @@ function Routing() {
         <Route path="budget" element={<Budget />} />
         <Route path="recurring" element={<Recurring />} />
         <Route path="savings" element={<Savings />} />
-        <Route path="investing" element={<Investing />} />
         <Route path="coach" element={<Coach />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="profile" element={<Profile />} />

@@ -10,7 +10,7 @@ import Confetti from "@/components/Confetti";
 import { OwlBubble } from "@/components/OwlMascot";
 import { Icon } from "@/lib/icons";
 import {
-  ArrowUpRight, ArrowDownRight, Wallet, TrendingUp, ChevronRight, Brain, Target, Flame, Zap,
+  ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, ChevronRight, Brain, Target, Flame, Zap,
 } from "lucide-react";
 
 const stagger = { show: { transition: { staggerChildren: 0.06 } } };
@@ -113,7 +113,7 @@ export default function Home() {
             <QuickAction icon={Wallet} label="Accounts" color="#8CFFDD" onClick={() => navigate("/app/money")} testid="quick-accounts" />
             <QuickAction icon={Target} label="Goals" color="#F5A623" onClick={() => navigate("/app/goals")} testid="quick-goals" />
             <QuickAction icon={Brain} label="Ask Coach" color="#B39AFF" onClick={() => navigate("/app/coach")} testid="quick-coach" />
-            <QuickAction icon={TrendingUp} label="Investing" color="#A9CBFF" onClick={() => navigate("/app/investing")} testid="quick-investing" />
+            <QuickAction icon={PiggyBank} label="Savings" color="#A9CBFF" onClick={() => navigate("/app/savings")} testid="quick-savings" />
           </div>
         </motion.div>
       )}
@@ -198,7 +198,7 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-4">
           <QuickAction icon={Wallet} label="Accounts" color="#8CFFDD" onClick={() => navigate("/app/money")} testid="quick-accounts" />
           <QuickAction icon={Brain} label="Insights" color="#B39AFF" onClick={() => navigate("/app/insights")} testid="quick-insights" />
-          <QuickAction icon={TrendingUp} label="Investing" color="#A9CBFF" onClick={() => navigate("/app/investing")} testid="quick-investing" />
+          <QuickAction icon={PiggyBank} label="Savings" color="#A9CBFF" onClick={() => navigate("/app/savings")} testid="quick-savings" />
           <QuickAction icon={Target} label="Goals" color="#F5A623" onClick={() => navigate("/app/goals")} testid="quick-goals" />
         </div>
       </motion.div>
