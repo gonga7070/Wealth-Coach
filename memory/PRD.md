@@ -10,6 +10,14 @@ A dark, premium, friendly, slightly-entertaining web app (mobile + desktop) call
 - **Demo data:** Realistic per-user seed (5 accounts, ~2 months of transactions, 3 goals, budget, recurring bills/subscriptions, notifications) generated on onboarding.
 
 
+## No-fabricated-data update (2026-06)
+Per user: the app shows ONLY the user's own real data — no simulated/sample data anywhere.
+- Removed the "Explore with sample data" onboarding option; onboarding never seeds; `/profile/reset-demo` now returns 410 (disabled).
+- Home dashboard is honest when empty: hides net worth, health score, streak/level chips and spending-change headline until the user has real accounts; shows a clear "Add your money" empty state + quick nav instead.
+- Manual accounts can now be removed from the Money page (trash button on manual rows → DELETE /accounts/{id}); bank connections removed via Settings disconnect; manual + bank add unchanged.
+- Settings confirmed: log out (Settings + sidebar), bank add/remove, light/dark theme, preferences.
+Note: alex@demo.com retains seeded data purely as a QA/demo login; real user accounts never get fabricated data.
+
 ## Real-user Phase 1 (COMPLETED & TESTED — 2026-06)
 Turned the demo prototype into a real-data app. User choices: empty-by-default + labeled sample mode; per-currency (no CAD/USD blending); soft email-verification gate; manual entry included; Plaid stays Sandbox.
 

@@ -71,10 +71,11 @@ export default function Home() {
   const { overview: o, primary_goal, top_insight, recent_transactions, health_label } = data;
   const up = o.spend_change_pct <= 0;
   const level = Math.max(1, Math.floor(o.health_score / 10));
+  const hasData = data.accounts.length > 0;
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
-      {confetti && <Confetti />}
+      {confetti && hasData && <Confetti />}
 
       <motion.div variants={item} className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -82,29 +83,42 @@ export default function Home() {
             {greeting()}, {user?.name?.split(" ")[0]} <span className="inline-block wc-float">👋</span>
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            {up ? `Nice — you're spending ${Math.abs(o.spend_change_pct)}% less this month.` : `You're up ${o.spend_change_pct}% in spending. Let's reel it in.`}
+            {hasData
+              ? (up ? `Nice — you're spending ${Math.abs(o.spend_change_pct)}% less this month.` : `You're up ${o.spend_change_pct}% in spending. Let's reel it in.`)
+              : "Let's set up your money — connect a bank or add an account to begin."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/12 border border-amber-500/25 text-amber-300 text-sm font-semibold" data-testid="streak-chip">
-            <Flame size={15} /> {streak} day{streak !== 1 ? "s" : ""}
+        {hasData && (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/12 border border-amber-500/25 text-amber-300 text-sm font-semibold" data-testid="streak-chip">
+              <Flame size={15} /> {streak} day{streak !== 1 ? "s" : ""}
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/12 border border-violet-500/25 text-violet-300 text-sm font-semibold" data-testid="level-chip">
+              <Zap size={15} /> Lv {level}
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/12 border border-violet-500/25 text-violet-300 text-sm font-semibold" data-testid="level-chip">
-            <Zap size={15} /> Lv {level}
-          </div>
-        </div>
+        )}
       </motion.div>
 
-      {data.accounts.length === 0 && (
-        <motion.div variants={item} className="wc-card p-6 border-amber-500/30" data-testid="home-empty-state">
-          <h3 className="font-head text-xl font-bold">Let's add your money</h3>
-          <p className="text-sm text-slate-400 mt-1">Connect a bank or add an account to see your real dashboard — everything here updates from your own data.</p>
-          <button onClick={() => navigate("/app/money")} data-testid="home-connect-cta" className="mt-4 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-5 py-2.5 text-sm">
-            Connect or add accounts
-          </button>
+      {!hasData && (
+        <motion.div variants={item} className="space-y-5">
+          <div className="wc-card p-6 border-amber-500/30" data-testid="home-empty-state">
+            <h3 className="font-head text-xl font-bold">Add your money to get started</h3>
+            <p className="text-sm text-slate-400 mt-1">Nothing here is simulated — your dashboard fills in from the real accounts you connect or add.</p>
+            <button onClick={() => navigate("/app/money")} data-testid="home-connect-cta" className="mt-4 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-5 py-2.5 text-sm">
+              Connect or add accounts
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <QuickAction icon={Wallet} label="Accounts" color="#8CFFDD" onClick={() => navigate("/app/money")} testid="quick-accounts" />
+            <QuickAction icon={Target} label="Goals" color="#F5A623" onClick={() => navigate("/app/goals")} testid="quick-goals" />
+            <QuickAction icon={Brain} label="Ask Coach" color="#B39AFF" onClick={() => navigate("/app/coach")} testid="quick-coach" />
+            <QuickAction icon={TrendingUp} label="Investing" color="#A9CBFF" onClick={() => navigate("/app/investing")} testid="quick-investing" />
+          </div>
         </motion.div>
       )}
 
+      {hasData && (<>
       {/* Net worth + health score */}
       <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="wc-card p-6 md:col-span-2" data-testid="networth-card">
@@ -216,6 +230,7 @@ export default function Home() {
           ))}
         </div>
       </motion.div>
+      </>)}
     </motion.div>
   );
 }

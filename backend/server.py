@@ -507,13 +507,11 @@ async def onboarding(req: OnboardingReq, user: dict = Depends(get_current_user))
     cur = "CAD" if (req.country or "").strip().lower() == "canada" else "USD"
     prefs = {**DEFAULT_PREFS, **(user.get("preferences") or {}), "display_currency": cur}
     updates = {"onboarded": True, "primary_goal": req.primary_goal, "help_with": req.help_with,
-               "country": req.country, "demo_mode": bool(req.use_demo), "preferences": prefs}
+               "country": req.country, "demo_mode": False, "preferences": prefs}
     if req.name:
         updates["name"] = req.name
     await db.users.update_one({"_id": oid(user["id"])}, {"$set": updates})
-    if req.use_demo:
-        await seed_user_data(user["id"], req.primary_goal, req.banks)
-    return {"ok": True, "demo_mode": bool(req.use_demo)}
+    return {"ok": True, "demo_mode": False}
 
 
 # ---------------- Dashboard ----------------
@@ -899,9 +897,8 @@ async def upgrade(user: dict = Depends(get_current_user)):
 
 @api.post("/profile/reset-demo")
 async def reset_demo(user: dict = Depends(get_current_user)):
-    u = await db.users.find_one({"_id": oid(user["id"])})
-    await seed_user_data(user["id"], u.get("primary_goal", "Save more"), u.get("banks"))
-    return {"ok": True}
+    # Sample/demo data is disabled — the app only ever shows the user's own real data.
+    raise HTTPException(status_code=410, detail="Sample data is disabled. The app only shows your own data.")
 
 
 class PlaidExchangeReq(BaseModel):

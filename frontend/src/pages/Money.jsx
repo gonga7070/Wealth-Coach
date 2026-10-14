@@ -14,7 +14,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ChevronRight, Wallet, PiggyBank, CreditCard, LineChart, Landmark, Plus, WalletCards } from "lucide-react";
+import { ChevronRight, Wallet, PiggyBank, CreditCard, LineChart, Landmark, Plus, WalletCards, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const TYPE_META = {
@@ -115,6 +115,18 @@ export default function Money() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  const removeAccount = async (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm("Remove this manual account and its transactions?")) return;
+    try {
+      await api.delete(`/accounts/${id}`);
+      toast.success("Account removed");
+      load();
+    } catch (err) {
+      toast.error(apiErr(err.response?.data?.detail));
+    }
+  };
+
   if (!data) return <div className="text-slate-500 animate-pulse">Loading accounts…</div>;
 
   const groups = {};
@@ -178,12 +190,13 @@ export default function Money() {
                 <h3 className="text-sm font-semibold text-slate-400 mb-2 px-1">{meta.label}</h3>
                 <div className="space-y-3">
                   {groups[type].map((a) => (
-                    <motion.button
+                    <motion.div
                       key={a.id}
                       whileHover={{ x: 4 }}
                       onClick={() => navigate(`/app/money/${a.id}`)}
                       data-testid={`account-${a.id}`}
-                      className="w-full wc-card wc-card-hover p-5 flex items-center justify-between text-left"
+                      role="button"
+                      className="w-full wc-card wc-card-hover p-5 flex items-center justify-between text-left cursor-pointer"
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-11 h-11 rounded-xl grid place-items-center overflow-hidden" style={{ background: `${meta.color}22`, color: meta.color }}>
@@ -203,9 +216,19 @@ export default function Money() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`font-num font-bold ${a.balance < 0 ? "text-rose-400" : ""}`}>{fmtCur(a.balance, a.currency || "USD")}</span>
+                        {a.source === "manual" && (
+                          <button
+                            onClick={(e) => removeAccount(e, a.id)}
+                            data-testid={`remove-account-${a.id}`}
+                            title="Remove account"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-white/5 transition"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                         <ChevronRight size={18} className="text-slate-600" />
                       </div>
-                    </motion.button>
+                    </motion.div>
                   ))}
                 </div>
               </div>

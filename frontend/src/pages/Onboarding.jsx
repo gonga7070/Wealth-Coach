@@ -7,7 +7,7 @@ import { OwlBubble } from "@/components/OwlMascot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  PiggyBank, CreditCard, Home, Car, Plane, TrendingUp, Check, Database, Landmark, User,
+  PiggyBank, CreditCard, Home, Car, Plane, TrendingUp, Check, Landmark, User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,16 +50,15 @@ export default function Onboarding() {
     setHelp((p) => (p.includes(h) ? p.filter((x) => x !== h) : [...p, h]));
 
   const finish = async (mode) => {
-    // mode: "connect" | "manual" | "sample"
+    // mode: "connect" | "manual"
     setLoading(true);
-    const useDemo = mode === "sample";
     try {
       await api.post("/onboarding", {
-        primary_goal: goal, help_with: help, use_demo: useDemo,
+        primary_goal: goal, help_with: help, use_demo: false,
         name: name.trim(), country, banks: [],
       });
-      setUser({ ...user, onboarded: true, name: name.trim(), country, demo_mode: useDemo });
-      navigate(mode === "sample" ? "/app" : "/app/money");
+      setUser({ ...user, onboarded: true, name: name.trim(), country, demo_mode: false });
+      navigate("/app/money");
     } catch {
       toast.error("Couldn't finish setup. Try again.");
     } finally {
@@ -151,7 +150,7 @@ export default function Onboarding() {
     // Step 4: how to start
     <div key="s4">
       <h1 className="font-head text-3xl font-extrabold">How do you want to start?</h1>
-      <p className="text-slate-400 mt-2 mb-5">Your dashboard uses only your real data. Nothing is simulated unless you choose sample data.</p>
+      <p className="text-slate-400 mt-2 mb-5">Your dashboard only ever shows your own real data — nothing is simulated.</p>
       <div className="space-y-3">
         <button
           onClick={() => finish("connect")}
@@ -174,19 +173,7 @@ export default function Onboarding() {
           <div className="w-11 h-11 rounded-xl bg-white/5 text-slate-300 grid place-items-center shrink-0"><User size={22} /></div>
           <div className="flex-1">
             <div className="font-semibold">Add accounts manually</div>
-            <div className="text-sm text-slate-400">Enter balances and transactions yourself — no bank needed.</div>
-          </div>
-        </button>
-        <button
-          onClick={() => finish("sample")}
-          disabled={loading}
-          data-testid="start-sample-btn"
-          className="w-full wc-card wc-card-hover p-5 flex items-center gap-4 text-left"
-        >
-          <div className="w-11 h-11 rounded-xl bg-white/5 text-slate-300 grid place-items-center shrink-0"><Database size={22} /></div>
-          <div className="flex-1">
-            <div className="font-semibold flex items-center gap-2">Explore with sample data <span className="text-[10px] uppercase tracking-wide bg-white/10 text-slate-300 rounded-full px-2 py-0.5">Demo</span></div>
-            <div className="text-sm text-slate-400">Try the app with realistic example data you can clear anytime.</div>
+            <div className="text-sm text-slate-400">Enter your real balances and transactions yourself — no bank needed.</div>
           </div>
         </button>
       </div>
