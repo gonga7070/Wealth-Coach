@@ -10,6 +10,12 @@ A dark, premium, friendly, slightly-entertaining web app (mobile + desktop) call
 - **Demo data:** Realistic per-user seed (5 accounts, ~2 months of transactions, 3 goals, budget, recurring bills/subscriptions, notifications) generated on onboarding.
 
 
+## Manual transaction entry (COMPLETED & TESTED — 2026-06)
+- Account Details page: manual accounts get an "Add transaction" button and each row opens an edit dialog (edit fields or delete). Bank accounts stay read-only (recategorize only).
+- Dialog fields: description, type (Expense/Income), amount, category, date, note.
+- Backend: POST `/transactions`, PATCH `/transactions/{id}`, DELETE `/transactions/{id}` (all manual-only). Each change keeps the manual account's balance in sync (inc/dec by amount/delta). Manual txns are restricted to manual accounts; bank transactions reject edit/delete (400).
+- Tested: API add/edit/delete with correct balance math + bank-txn rejection; UI add verified (balance + spending updated live).
+
 ## No-fabricated-data update (2026-06)
 Per user: the app shows ONLY the user's own real data — no simulated/sample data anywhere.
 - Removed the "Explore with sample data" onboarding option; onboarding never seeds; `/profile/reset-demo` now returns 410 (disabled).

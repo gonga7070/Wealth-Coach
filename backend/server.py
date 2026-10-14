@@ -189,6 +189,14 @@ class ManualTxnReq(BaseModel):
     note: Optional[str] = None
 
 
+class ManualTxnUpdate(BaseModel):
+    merchant: Optional[str] = None
+    amount: Optional[float] = None
+    category: Optional[str] = None
+    date: Optional[str] = None
+    note: Optional[str] = None
+
+
 class PreferencesReq(BaseModel):
     name: Optional[str] = None
     country: Optional[str] = None
@@ -1110,11 +1118,15 @@ async def create_manual_txn(req: ManualTxnReq, user: dict = Depends(get_current_
     acct = await db.accounts.find_one({"_id": oid(req.account_id), "user_id": user["id"]})
     if not acct:
         raise HTTPException(status_code=404, detail="Account not found")
+    if acct.get("source") != "manual":
+        raise HTTPException(status_code=400, detail="Transactions can only be added to manual accounts")
+    amount = round(req.amount, 2)
     doc = {"user_id": user["id"], "account_id": req.account_id, "merchant": req.merchant,
-           "amount": round(req.amount, 2), "category": req.category,
+           "amount": amount, "category": req.category,
            "date": req.date or datetime.now(timezone.utc).isoformat(),
            "pending": False, "note": req.note or "", "source": "manual"}
     res = await db.transactions.insert_one(doc)
+    await db.accounts.update_one({"_id": oid(req.account_id)}, {"$inc": {"balance": amount}})
     return {"ok": True, "id": str(res.inserted_id)}
 
 
@@ -1126,6 +1138,25 @@ async def delete_manual_txn(txn_id: str, user: dict = Depends(get_current_user))
     if t.get("source") != "manual":
         raise HTTPException(status_code=400, detail="Bank transactions can't be deleted")
     await db.transactions.delete_one({"_id": oid(txn_id)})
+    await db.accounts.update_one({"_id": oid(t["account_id"])}, {"$inc": {"balance": -round(t.get("amount", 0), 2)}})
+    return {"ok": True}
+
+
+@api.patch("/transactions/{txn_id}")
+async def update_manual_txn(txn_id: str, req: ManualTxnUpdate, user: dict = Depends(get_current_user)):
+    t = await db.transactions.find_one({"_id": oid(txn_id), "user_id": user["id"]})
+    if not t:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    if t.get("source") != "manual":
+        raise HTTPException(status_code=400, detail="Bank transactions can't be edited")
+    upd = {k: v for k, v in req.dict().items() if v is not None}
+    if "amount" in upd:
+        upd["amount"] = round(upd["amount"], 2)
+        delta = upd["amount"] - round(t.get("amount", 0), 2)
+        if delta:
+            await db.accounts.update_one({"_id": oid(t["account_id"])}, {"$inc": {"balance": delta}})
+    if upd:
+        await db.transactions.update_one({"_id": oid(txn_id)}, {"$set": upd})
     return {"ok": True}
 
 
